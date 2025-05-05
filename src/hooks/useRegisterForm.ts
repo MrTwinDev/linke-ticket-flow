@@ -60,14 +60,14 @@ export const useRegisterForm = () => {
   const handleNextStep = () => {
     if (step === 1) {
       const validationErrors = validateStep1(
+        email,
+        phone,
         personType,
         fullName,
+        documentNumber,
         companyName,
         responsibleName,
-        responsibleCpf,
-        documentNumber,
-        email,
-        phone
+        responsibleCpf
       );
       setErrors(validationErrors);
       if (Object.keys(validationErrors).length > 0) return;
