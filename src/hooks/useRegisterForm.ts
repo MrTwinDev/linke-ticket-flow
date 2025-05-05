@@ -7,10 +7,92 @@ import { validateStep1, validateStep2, validateStep3 } from "@/utils/registerVal
 import { supabase } from "@/integrations/supabase/client";  // Fixed import path
 
 export const useRegisterForm = () => {
-  // ... estados omitidos para brevidade ...
+  // Form steps
+  const [step, setStep] = useState(1);
+  
+  // Profile type state
+  const [profileType, setProfileType] = useState<ProfileType>("importer");
+  const [personType, setPersonType] = useState<PersonType>("PF");
+  
+  // Person data
+  const [fullName, setFullName] = useState("");
+  const [companyName, setCompanyName] = useState("");
+  const [responsibleName, setResponsibleName] = useState("");
+  const [responsibleCpf, setResponsibleCpf] = useState("");
+  const [documentNumber, setDocumentNumber] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  
+  // Address data
+  const [cep, setCep] = useState("");
+  const [street, setStreet] = useState("");
+  const [number, setNumber] = useState("");
+  const [complement, setComplement] = useState("");
+  const [neighborhood, setNeighborhood] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+  
+  // Security data
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  
+  // UI state
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [isLoading, setIsLoading] = useState(false);
+  const [apiError, setApiError] = useState<string | null>(null);
 
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  // Reset fields based on profile type and person type
+  const resetFields = () => {
+    if (personType === "PF") {
+      setCompanyName("");
+      setResponsibleName("");
+      setResponsibleCpf("");
+    } else {
+      setFullName("");
+    }
+    setDocumentNumber("");
+  };
+
+  // Form navigation
+  const handleNextStep = () => {
+    if (step === 1) {
+      const validationErrors = validateStep1(
+        personType,
+        fullName,
+        companyName,
+        responsibleName,
+        responsibleCpf,
+        documentNumber,
+        email,
+        phone
+      );
+      setErrors(validationErrors);
+      if (Object.keys(validationErrors).length > 0) return;
+      setStep(2);
+    } else if (step === 2) {
+      const validationErrors = validateStep2(
+        cep,
+        street,
+        number,
+        neighborhood,
+        city,
+        state
+      );
+      setErrors(validationErrors);
+      if (Object.keys(validationErrors).length > 0) return;
+      setStep(3);
+    }
+  };
+
+  const handlePrevStep = () => {
+    if (step > 1) {
+      setStep(step - 1);
+      setErrors({});
+    }
+  };
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
@@ -95,9 +177,45 @@ export const useRegisterForm = () => {
     }
   };
 
-  // ... resto do hook ...
   return {
-    // ... tudo como antes, incluindo handleSubmit ...
+    // Form state
+    step,
+    
+    // Profile type state
+    profileType, setProfileType,
+    personType, setPersonType,
+    
+    // Person data
+    fullName, setFullName,
+    companyName, setCompanyName,
+    responsibleName, setResponsibleName,
+    responsibleCpf, setResponsibleCpf,
+    documentNumber, setDocumentNumber,
+    email, setEmail,
+    phone, setPhone,
+    
+    // Address data
+    cep, setCep,
+    street, setStreet,
+    number, setNumber,
+    complement, setComplement,
+    neighborhood, setNeighborhood,
+    city, setCity,
+    state, setState,
+    
+    // Security data
+    password, setPassword,
+    confirmPassword, setConfirmPassword,
+    
+    // UI state
+    errors,
+    isLoading,
+    apiError,
+    
+    // Functions
+    handleNextStep,
+    handlePrevStep,
     handleSubmit,
+    resetFields,
   };
 };
