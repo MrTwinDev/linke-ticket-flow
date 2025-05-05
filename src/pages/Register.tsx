@@ -104,16 +104,16 @@ const Register = () => {
       } else {
         toast({
           variant: "destructive",
-          title: "Address not found",
-          description: "CEP not found. Please enter address details manually.",
+          title: "Endereço não encontrado",
+          description: "CEP não encontrado. Por favor, insira os detalhes do endereço manualmente.",
         });
       }
     } catch (error) {
       console.error(error);
       toast({
         variant: "destructive",
-        title: "Error fetching address",
-        description: "An error occurred. Please enter address details manually.",
+        title: "Erro ao buscar endereço",
+        description: "Ocorreu um erro. Por favor, insira os detalhes do endereço manualmente.",
       });
     } finally {
       setIsCepLoading(false);
@@ -125,36 +125,36 @@ const Register = () => {
     const newErrors: Record<string, string> = {};
     
     if (!email || !isValidEmail(email)) {
-      newErrors.email = "Please enter a valid email address";
+      newErrors.email = "Por favor, insira um endereço de e-mail válido";
     }
     
     if (!phone || !isValidPhone(phone)) {
-      newErrors.phone = "Please enter a valid phone number";
+      newErrors.phone = "Por favor, insira um número de telefone válido";
     }
     
     if (personType === "PF") {
       if (!fullName.trim()) {
-        newErrors.fullName = "Full name is required";
+        newErrors.fullName = "Nome completo é obrigatório";
       }
       
       if (!documentNumber || !isValidCPF(documentNumber)) {
-        newErrors.documentNumber = "Please enter a valid CPF";
+        newErrors.documentNumber = "Por favor, insira um CPF válido";
       }
     } else {
       if (!companyName.trim()) {
-        newErrors.companyName = "Company name is required";
+        newErrors.companyName = "Nome da empresa é obrigatório";
       }
       
       if (!documentNumber || !isValidCNPJ(documentNumber)) {
-        newErrors.documentNumber = "Please enter a valid CNPJ";
+        newErrors.documentNumber = "Por favor, insira um CNPJ válido";
       }
       
       if (!responsibleName.trim()) {
-        newErrors.responsibleName = "Responsible person name is required";
+        newErrors.responsibleName = "Nome do responsável é obrigatório";
       }
       
       if (!responsibleCpf || !isValidCPF(responsibleCpf)) {
-        newErrors.responsibleCpf = "Please enter a valid CPF for the responsible person";
+        newErrors.responsibleCpf = "Por favor, insira um CPF válido para o responsável";
       }
     }
     
@@ -167,27 +167,27 @@ const Register = () => {
     const newErrors: Record<string, string> = {};
     
     if (!cep || !isValidCEP(cep)) {
-      newErrors.cep = "Please enter a valid CEP";
+      newErrors.cep = "Por favor, insira um CEP válido";
     }
     
     if (!street.trim()) {
-      newErrors.street = "Street is required";
+      newErrors.street = "Logradouro é obrigatório";
     }
     
     if (!number.trim()) {
-      newErrors.number = "Number is required";
+      newErrors.number = "Número é obrigatório";
     }
     
     if (!neighborhood.trim()) {
-      newErrors.neighborhood = "Neighborhood is required";
+      newErrors.neighborhood = "Bairro é obrigatório";
     }
     
     if (!city.trim()) {
-      newErrors.city = "City is required";
+      newErrors.city = "Cidade é obrigatória";
     }
     
     if (!state.trim()) {
-      newErrors.state = "State is required";
+      newErrors.state = "Estado é obrigatório";
     }
     
     setErrors(newErrors);
@@ -199,11 +199,11 @@ const Register = () => {
     const newErrors: Record<string, string> = {};
     
     if (!password.trim() || password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
+      newErrors.password = "A senha deve ter pelo menos 6 caracteres";
     }
     
     if (password !== confirmPassword) {
-      newErrors.confirmPassword = "Passwords don't match";
+      newErrors.confirmPassword = "As senhas não coincidem";
     }
     
     setErrors(newErrors);
@@ -269,8 +269,8 @@ const Register = () => {
       await register(userData as any);
       
       toast({
-        title: "Registration successful",
-        description: "Your account has been created successfully.",
+        title: "Registro bem-sucedido",
+        description: "Sua conta foi criada com sucesso.",
       });
       
       navigate("/dashboard");
@@ -278,8 +278,8 @@ const Register = () => {
       console.error(error);
       toast({
         variant: "destructive",
-        title: "Registration failed",
-        description: "An error occurred during registration.",
+        title: "Falha no registro",
+        description: "Ocorreu um erro durante o registro.",
       });
     } finally {
       setIsLoading(false);
@@ -303,9 +303,9 @@ const Register = () => {
       <div className="flex-grow flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md">
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-900">Create an account</h2>
+            <h2 className="text-3xl font-bold text-gray-900">Criar uma conta</h2>
             <p className="mt-2 text-sm text-gray-600">
-              Join LinkeImport to streamline your customs processes
+              Junte-se ao LinkeImport para simplificar seus processos aduaneiros
             </p>
           </div>
 
@@ -315,15 +315,15 @@ const Register = () => {
             onValueChange={(value) => setProfileType(value as ProfileType)}
           >
             <TabsList className="grid w-full grid-cols-2 mb-6">
-              <TabsTrigger value="importer">Importer</TabsTrigger>
-              <TabsTrigger value="broker">Customs Broker</TabsTrigger>
+              <TabsTrigger value="importer">Importador</TabsTrigger>
+              <TabsTrigger value="broker">Despachante Aduaneiro</TabsTrigger>
             </TabsList>
 
             <TabsContent value="importer">
               <div className="mb-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-medium text-gray-900">
-                    Step {step} of 3: {step === 1 ? "Profile Information" : step === 2 ? "Address" : "Security"}
+                    Etapa {step} de 3: {step === 1 ? "Informações do Perfil" : step === 2 ? "Endereço" : "Segurança"}
                   </h3>
                   <div className="flex space-x-1">
                     <div className={`h-2 w-2 rounded-full ${step >= 1 ? "bg-linkeblue-600" : "bg-gray-300"}`}></div>
@@ -336,7 +336,7 @@ const Register = () => {
                   <form>
                     <div className="space-y-4">
                       <div>
-                        <Label>Person Type</Label>
+                        <Label>Tipo de Pessoa</Label>
                         <RadioGroup 
                           defaultValue="PF" 
                           className="flex space-x-4 mt-2"
@@ -344,24 +344,24 @@ const Register = () => {
                         >
                           <div className="flex items-center space-x-2">
                             <RadioGroupItem value="PF" id="pf" />
-                            <Label htmlFor="pf">Individual (CPF)</Label>
+                            <Label htmlFor="pf">Pessoa Física (CPF)</Label>
                           </div>
                           <div className="flex items-center space-x-2">
                             <RadioGroupItem value="PJ" id="pj" />
-                            <Label htmlFor="pj">Company (CNPJ)</Label>
+                            <Label htmlFor="pj">Pessoa Jurídica (CNPJ)</Label>
                           </div>
                         </RadioGroup>
                       </div>
 
                       {personType === "PF" ? (
                         <div>
-                          <Label htmlFor="fullName">Full Name</Label>
+                          <Label htmlFor="fullName">Nome Completo</Label>
                           <Input
                             id="fullName"
                             value={fullName}
                             onChange={(e) => setFullName(e.target.value)}
                             className={`mt-1 ${errors.fullName ? "border-red-500" : ""}`}
-                            placeholder="Your full name"
+                            placeholder="Seu nome completo"
                           />
                           {errors.fullName && (
                             <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>
@@ -370,33 +370,33 @@ const Register = () => {
                       ) : (
                         <>
                           <div>
-                            <Label htmlFor="companyName">Company Name</Label>
+                            <Label htmlFor="companyName">Nome da Empresa</Label>
                             <Input
                               id="companyName"
                               value={companyName}
                               onChange={(e) => setCompanyName(e.target.value)}
                               className={`mt-1 ${errors.companyName ? "border-red-500" : ""}`}
-                              placeholder="Your company name"
+                              placeholder="Nome da sua empresa"
                             />
                             {errors.companyName && (
                               <p className="text-red-500 text-xs mt-1">{errors.companyName}</p>
                             )}
                           </div>
                           <div>
-                            <Label htmlFor="responsibleName">Responsible Person Name</Label>
+                            <Label htmlFor="responsibleName">Nome do Responsável</Label>
                             <Input
                               id="responsibleName"
                               value={responsibleName}
                               onChange={(e) => setResponsibleName(e.target.value)}
                               className={`mt-1 ${errors.responsibleName ? "border-red-500" : ""}`}
-                              placeholder="Responsible person's name"
+                              placeholder="Nome do responsável"
                             />
                             {errors.responsibleName && (
                               <p className="text-red-500 text-xs mt-1">{errors.responsibleName}</p>
                             )}
                           </div>
                           <div>
-                            <Label htmlFor="responsibleCpf">Responsible Person CPF</Label>
+                            <Label htmlFor="responsibleCpf">CPF do Responsável</Label>
                             <Input
                               id="responsibleCpf"
                               value={responsibleCpf}
@@ -428,14 +428,14 @@ const Register = () => {
                       </div>
 
                       <div>
-                        <Label htmlFor="email">Email address</Label>
+                        <Label htmlFor="email">Endereço de e-mail</Label>
                         <Input
                           id="email"
                           type="email"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
                           className={`mt-1 ${errors.email ? "border-red-500" : ""}`}
-                          placeholder="you@example.com"
+                          placeholder="voce@exemplo.com"
                         />
                         {errors.email && (
                           <p className="text-red-500 text-xs mt-1">{errors.email}</p>
@@ -443,7 +443,7 @@ const Register = () => {
                       </div>
 
                       <div>
-                        <Label htmlFor="phone">Phone</Label>
+                        <Label htmlFor="phone">Telefone</Label>
                         <Input
                           id="phone"
                           value={phone}
@@ -463,7 +463,7 @@ const Register = () => {
                         className="w-full"
                         onClick={handleNextStep}
                       >
-                        Next: Address Information
+                        Próximo: Informações de Endereço
                       </Button>
                     </div>
                   </form>
@@ -488,13 +488,13 @@ const Register = () => {
                       </div>
 
                       <div>
-                        <Label htmlFor="street">Street</Label>
+                        <Label htmlFor="street">Logradouro</Label>
                         <Input
                           id="street"
                           value={street}
                           onChange={(e) => setStreet(e.target.value)}
                           className={`mt-1 ${errors.street ? "border-red-500" : ""}`}
-                          placeholder="Street name"
+                          placeholder="Nome da rua"
                           disabled={isCepLoading}
                         />
                         {errors.street && (
@@ -504,7 +504,7 @@ const Register = () => {
 
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <Label htmlFor="address-number">Number</Label>
+                          <Label htmlFor="address-number">Número</Label>
                           <Input
                             id="address-number"
                             value={number}
@@ -519,26 +519,26 @@ const Register = () => {
                         </div>
 
                         <div>
-                          <Label htmlFor="complement">Complement (optional)</Label>
+                          <Label htmlFor="complement">Complemento (opcional)</Label>
                           <Input
                             id="complement"
                             value={complement}
                             onChange={(e) => setComplement(e.target.value)}
                             className="mt-1"
-                            placeholder="Apt, Suite, etc."
+                            placeholder="Apto, Sala, etc."
                             disabled={isCepLoading}
                           />
                         </div>
                       </div>
 
                       <div>
-                        <Label htmlFor="neighborhood">Neighborhood</Label>
+                        <Label htmlFor="neighborhood">Bairro</Label>
                         <Input
                           id="neighborhood"
                           value={neighborhood}
                           onChange={(e) => setNeighborhood(e.target.value)}
                           className={`mt-1 ${errors.neighborhood ? "border-red-500" : ""}`}
-                          placeholder="Neighborhood"
+                          placeholder="Bairro"
                           disabled={isCepLoading}
                         />
                         {errors.neighborhood && (
@@ -548,13 +548,13 @@ const Register = () => {
 
                       <div className="grid grid-cols-2 gap-4">
                         <div>
-                          <Label htmlFor="city">City</Label>
+                          <Label htmlFor="city">Cidade</Label>
                           <Input
                             id="city"
                             value={city}
                             onChange={(e) => setCity(e.target.value)}
                             className={`mt-1 ${errors.city ? "border-red-500" : ""}`}
-                            placeholder="City"
+                            placeholder="Cidade"
                             disabled={isCepLoading}
                           />
                           {errors.city && (
@@ -563,13 +563,13 @@ const Register = () => {
                         </div>
 
                         <div>
-                          <Label htmlFor="state">State</Label>
+                          <Label htmlFor="state">Estado</Label>
                           <Input
                             id="state"
                             value={state}
                             onChange={(e) => setState(e.target.value)}
                             className={`mt-1 ${errors.state ? "border-red-500" : ""}`}
-                            placeholder="State"
+                            placeholder="Estado"
                             disabled={isCepLoading}
                           />
                           {errors.state && (
@@ -586,7 +586,7 @@ const Register = () => {
                         className="w-1/2"
                         onClick={handlePrevStep}
                       >
-                        Back
+                        Voltar
                       </Button>
                       <Button
                         type="button"
@@ -594,7 +594,7 @@ const Register = () => {
                         onClick={handleNextStep}
                         disabled={isCepLoading}
                       >
-                        Next: Create Password
+                        Próximo: Criar Senha
                       </Button>
                     </div>
                   </form>
@@ -604,7 +604,7 @@ const Register = () => {
                   <form onSubmit={handleSubmit}>
                     <div className="space-y-4">
                       <div>
-                        <Label htmlFor="password">Password</Label>
+                        <Label htmlFor="password">Senha</Label>
                         <Input
                           id="password"
                           type="password"
@@ -618,7 +618,7 @@ const Register = () => {
                       </div>
 
                       <div>
-                        <Label htmlFor="confirmPassword">Confirm Password</Label>
+                        <Label htmlFor="confirmPassword">Confirmar Senha</Label>
                         <Input
                           id="confirmPassword"
                           type="password"
@@ -639,14 +639,14 @@ const Register = () => {
                         className="w-1/2"
                         onClick={handlePrevStep}
                       >
-                        Back
+                        Voltar
                       </Button>
                       <Button
                         type="submit"
                         className="w-1/2"
                         disabled={isLoading}
                       >
-                        {isLoading ? "Creating account..." : "Create Account"}
+                        {isLoading ? "Criando conta..." : "Criar Conta"}
                       </Button>
                     </div>
                   </form>
@@ -658,7 +658,7 @@ const Register = () => {
               <div className="mb-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="font-medium text-gray-900">
-                    Step {step} of 3: {step === 1 ? "Profile Information" : step === 2 ? "Address" : "Security"}
+                    Etapa {step} de 3: {step === 1 ? "Informações do Perfil" : step === 2 ? "Endereço" : "Segurança"}
                   </h3>
                   <div className="flex space-x-1">
                     <div className={`h-2 w-2 rounded-full ${step >= 1 ? "bg-linkeblue-600" : "bg-gray-300"}`}></div>
@@ -671,8 +671,8 @@ const Register = () => {
                 {/* This is a duplicate of the importer form with potentially different validation */}
                 {/* For brevity, I'm omitting the duplicate code here */}
                 <div className="text-sm text-center text-gray-600">
-                  The broker registration form has the same structure as the importer form.
-                  The validation and fields are identical.
+                  O formulário de registro para despachante tem a mesma estrutura que o formulário de importador.
+                  A validação e campos são idênticos.
                 </div>
               </div>
             </TabsContent>
@@ -680,9 +680,9 @@ const Register = () => {
 
           <div className="text-center mt-6">
             <p className="text-sm text-gray-600">
-              Already have an account?{" "}
+              Já possui uma conta?{" "}
               <Link to="/login" className="text-linkeblue-600 hover:underline">
-                Sign in
+                Entrar
               </Link>
             </p>
           </div>

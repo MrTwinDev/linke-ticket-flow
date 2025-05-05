@@ -47,15 +47,15 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
                   <Bell size={18} />
                   <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-500"></span>
                 </Button>
-                <Button variant="outline" onClick={handleLogout}>Logout</Button>
+                <Button variant="outline" onClick={handleLogout}>Sair</Button>
               </>
             ) : (
               <>
                 <Link to="/login">
-                  <Button variant="ghost">Login</Button>
+                  <Button variant="ghost">Entrar</Button>
                 </Link>
                 <Link to="/register">
-                  <Button>Register</Button>
+                  <Button>Registrar</Button>
                 </Link>
               </>
             )}
@@ -81,19 +81,19 @@ const Header = ({ toggleSidebar }: HeaderProps) => {
               <>
                 <div className="flex items-center py-2">
                   <Bell size={18} className="mr-2" />
-                  <span>Notifications</span>
+                  <span>Notificações</span>
                 </div>
                 <Button variant="outline" className="w-full" onClick={handleLogout}>
-                  Logout
+                  Sair
                 </Button>
               </>
             ) : (
               <>
                 <Link to="/login" className="block">
-                  <Button variant="ghost" className="w-full">Login</Button>
+                  <Button variant="ghost" className="w-full">Entrar</Button>
                 </Link>
                 <Link to="/register" className="block">
-                  <Button className="w-full">Register</Button>
+                  <Button className="w-full">Registrar</Button>
                 </Link>
               </>
             )}

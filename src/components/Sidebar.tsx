@@ -33,7 +33,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }: SidebarProps) => {
       <div className="flex-1 overflow-y-auto p-4">
         <div className="mb-6">
           <p className="mb-2 text-xs font-semibold uppercase text-gray-500">
-            Main Navigation
+            Navegação Principal
           </p>
           <nav className="space-y-1">
             <NavLink
@@ -49,7 +49,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }: SidebarProps) => {
               }
             >
               <Home size={18} className="mr-2" />
-              Dashboard
+              Painel
             </NavLink>
             <NavLink
               to="/dashboard/tickets"
@@ -79,7 +79,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }: SidebarProps) => {
                 }
               >
                 <FileText size={18} className="mr-2" />
-                Create Ticket
+                Criar Ticket
               </NavLink>
             )}
           </nav>
@@ -90,12 +90,12 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }: SidebarProps) => {
         <div className="flex items-center">
           <div className="flex-shrink-0">
             <div className="h-8 w-8 rounded-full bg-linkeblue-600 flex items-center justify-center text-white font-medium">
-              {profileType === "importer" ? "I" : "B"}
+              {profileType === "importer" ? "I" : "D"}
             </div>
           </div>
           <div className="ml-3">
             <p className="text-sm font-medium text-gray-700">
-              {profileType === "importer" ? "Importer" : "Broker"} Account
+              Conta de {profileType === "importer" ? "Importador" : "Despachante"}
             </p>
           </div>
         </div>

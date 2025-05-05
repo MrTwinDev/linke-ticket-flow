@@ -39,8 +39,8 @@ const CreateTicket = () => {
     if (profileType !== "importer") {
       toast({
         variant: "destructive",
-        title: "Access denied",
-        description: "Only importers can create tickets.",
+        title: "Acesso negado",
+        description: "Apenas importadores podem criar tickets.",
       });
       navigate("/dashboard");
     }
@@ -92,15 +92,15 @@ const CreateTicket = () => {
     const newErrors: Record<string, string> = {};
     
     if (!title.trim()) {
-      newErrors.title = "Title is required";
+      newErrors.title = "Título é obrigatório";
     }
     
     if (!description.trim()) {
-      newErrors.description = "Description is required";
+      newErrors.description = "Descrição é obrigatória";
     }
     
     if (!selectedBrokerId) {
-      newErrors.broker = "Please select a broker";
+      newErrors.broker = "Por favor, selecione um despachante";
     }
     
     setErrors(newErrors);
@@ -119,8 +119,8 @@ const CreateTicket = () => {
     // Simulate API call to create ticket
     setTimeout(() => {
       toast({
-        title: "Ticket created",
-        description: "Your ticket has been created successfully.",
+        title: "Ticket criado",
+        description: "Seu ticket foi criado com sucesso.",
       });
       
       setIsSubmitting(false);
@@ -162,25 +162,25 @@ const CreateTicket = () => {
             <ArrowLeft size={20} />
           </Button>
         </Link>
-        <h1 className="text-2xl font-bold text-gray-900">Create New Ticket</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Criar Novo Ticket</h1>
       </div>
       
       <Card>
         <CardHeader>
-          <CardTitle className="text-lg">Ticket Information</CardTitle>
+          <CardTitle className="text-lg">Informações do Ticket</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <Label htmlFor="title" className={errors.title ? "text-red-500" : ""}>
-                Title
+                Título
               </Label>
               <Input
                 id="title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 className={`mt-1 ${errors.title ? "border-red-500" : ""}`}
-                placeholder="Brief title for your request"
+                placeholder="Título breve para sua solicitação"
               />
               {errors.title && (
                 <p className="text-red-500 text-xs mt-1">{errors.title}</p>
@@ -189,14 +189,14 @@ const CreateTicket = () => {
             
             <div>
               <Label htmlFor="description" className={errors.description ? "text-red-500" : ""}>
-                Detailed Description
+                Descrição Detalhada
               </Label>
               <Textarea
                 id="description"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 className={`mt-1 min-h-[150px] ${errors.description ? "border-red-500" : ""}`}
-                placeholder="Provide detailed information about your request"
+                placeholder="Forneça informações detalhadas sobre sua solicitação"
               />
               {errors.description && (
                 <p className="text-red-500 text-xs mt-1">{errors.description}</p>
@@ -205,7 +205,7 @@ const CreateTicket = () => {
             
             <div>
               <Label htmlFor="broker" className={errors.broker ? "text-red-500" : ""}>
-                Select Broker
+                Selecionar Despachante
               </Label>
               <Select 
                 value={selectedBrokerId} 
@@ -215,7 +215,7 @@ const CreateTicket = () => {
                   id="broker" 
                   className={`mt-1 ${errors.broker ? "border-red-500" : ""}`}
                 >
-                  <SelectValue placeholder="Select a customs broker" />
+                  <SelectValue placeholder="Selecione um despachante aduaneiro" />
                 </SelectTrigger>
                 <SelectContent>
                   {brokers.map(broker => (
@@ -231,17 +231,17 @@ const CreateTicket = () => {
             </div>
             
             <div>
-              <Label>Attachments</Label>
+              <Label>Anexos</Label>
               <div className="mt-1 border-2 border-dashed border-gray-300 rounded-lg p-6 text-center cursor-pointer hover:bg-gray-50 transition-colors"
                 onClick={() => fileInputRef.current?.click()}
               >
                 <Paperclip className="mx-auto h-12 w-12 text-gray-400" />
                 <div className="mt-2">
                   <p className="text-sm text-gray-600">
-                    Click to upload files, or drag and drop
+                    Clique para enviar arquivos, ou arraste e solte
                   </p>
                   <p className="text-xs text-gray-500 mt-1">
-                    PDF, JPG, PNG, DOCX (Max size: 10MB)
+                    PDF, JPG, PNG, DOCX (Tamanho máximo: 10MB)
                   </p>
                 </div>
                 <input
@@ -286,11 +286,11 @@ const CreateTicket = () => {
             <div className="pt-4 flex justify-end space-x-3">
               <Link to="/dashboard/tickets">
                 <Button variant="outline" type="button">
-                  Cancel
+                  Cancelar
                 </Button>
               </Link>
               <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting ? "Creating..." : "Create Ticket"}
+                {isSubmitting ? "Criando..." : "Criar Ticket"}
               </Button>
             </div>
           </form>

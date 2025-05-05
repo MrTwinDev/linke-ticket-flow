@@ -25,16 +25,16 @@ const Login = () => {
     try {
       await login(email, password, profileType);
       toast({
-        title: "Login successful",
-        description: `Welcome back to your ${profileType} account.`,
+        title: "Login bem-sucedido",
+        description: `Bem-vindo de volta à sua conta de ${profileType === "importer" ? "importador" : "despachante"}.`,
       });
       navigate("/dashboard");
     } catch (error) {
       console.error(error);
       toast({
         variant: "destructive",
-        title: "Login failed",
-        description: "Invalid credentials or you don't have this profile type.",
+        title: "Falha no login",
+        description: "Credenciais inválidas ou você não possui este tipo de perfil.",
       });
     } finally {
       setIsLoading(false);
@@ -48,9 +48,9 @@ const Login = () => {
       <div className="flex-grow flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md">
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-900">Welcome back</h2>
+            <h2 className="text-3xl font-bold text-gray-900">Bem-vindo de volta</h2>
             <p className="mt-2 text-sm text-gray-600">
-              Please enter your credentials to access your account
+              Por favor, insira suas credenciais para acessar sua conta
             </p>
           </div>
 
@@ -60,13 +60,13 @@ const Login = () => {
                 value="importer" 
                 onClick={() => setProfileType("importer")}
               >
-                Importer
+                Importador
               </TabsTrigger>
               <TabsTrigger 
                 value="broker" 
                 onClick={() => setProfileType("broker")}
               >
-                Customs Broker
+                Despachante Aduaneiro
               </TabsTrigger>
             </TabsList>
 
@@ -74,7 +74,7 @@ const Login = () => {
               <form className="mt-4 space-y-6" onSubmit={handleLogin}>
                 <div className="space-y-4">
                   <div>
-                    <Label htmlFor="importer-email">Email address</Label>
+                    <Label htmlFor="importer-email">Endereço de e-mail</Label>
                     <Input
                       id="importer-email"
                       name="email"
@@ -84,15 +84,15 @@ const Login = () => {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="mt-1"
-                      placeholder="you@company.com"
+                      placeholder="voce@empresa.com"
                     />
                   </div>
                   <div>
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="importer-password">Password</Label>
+                      <Label htmlFor="importer-password">Senha</Label>
                       <div className="text-sm">
                         <a href="#" className="text-linkeblue-600 hover:underline">
-                          Forgot password?
+                          Esqueceu a senha?
                         </a>
                       </div>
                     </div>
@@ -115,7 +115,7 @@ const Login = () => {
                     className="w-full"
                     disabled={isLoading}
                   >
-                    {isLoading ? "Signing in..." : "Sign in as Importer"}
+                    {isLoading ? "Entrando..." : "Entrar como Importador"}
                   </Button>
                 </div>
               </form>
@@ -125,7 +125,7 @@ const Login = () => {
               <form className="mt-4 space-y-6" onSubmit={handleLogin}>
                 <div className="space-y-4">
                   <div>
-                    <Label htmlFor="broker-email">Email address</Label>
+                    <Label htmlFor="broker-email">Endereço de e-mail</Label>
                     <Input
                       id="broker-email"
                       name="email"
@@ -135,15 +135,15 @@ const Login = () => {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="mt-1"
-                      placeholder="you@broker.com"
+                      placeholder="voce@despachante.com"
                     />
                   </div>
                   <div>
                     <div className="flex items-center justify-between">
-                      <Label htmlFor="broker-password">Password</Label>
+                      <Label htmlFor="broker-password">Senha</Label>
                       <div className="text-sm">
                         <a href="#" className="text-linkeblue-600 hover:underline">
-                          Forgot password?
+                          Esqueceu a senha?
                         </a>
                       </div>
                     </div>
@@ -166,7 +166,7 @@ const Login = () => {
                     className="w-full"
                     disabled={isLoading}
                   >
-                    {isLoading ? "Signing in..." : "Sign in as Broker"}
+                    {isLoading ? "Entrando..." : "Entrar como Despachante"}
                   </Button>
                 </div>
               </form>
@@ -175,19 +175,19 @@ const Login = () => {
 
           <div className="text-center mt-6">
             <p className="text-sm text-gray-600">
-              Don't have an account?{" "}
+              Não tem uma conta?{" "}
               <Link to="/register" className="text-linkeblue-600 hover:underline">
-                Register now
+                Registre-se agora
               </Link>
             </p>
           </div>
           
           <div className="text-center mt-4 text-sm text-gray-500">
             <p>
-              Demo Accounts:<br />
-              Importer: importer@example.com<br />
-              Broker: broker@example.com<br />
-              Password for both: password
+              Contas de Demonstração:<br />
+              Importador: importer@example.com<br />
+              Despachante: broker@example.com<br />
+              Senha para ambos: password
             </p>
           </div>
         </div>

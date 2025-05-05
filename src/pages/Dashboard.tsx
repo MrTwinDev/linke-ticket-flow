@@ -32,7 +32,7 @@ const Dashboard = () => {
     const mockRecentTickets: Ticket[] = [
       {
         id: "1",
-        title: "Import clearance for machinery parts",
+        title: "Desembaraço de peças de maquinário",
         status: "open",
         createdAt: "2025-04-30T10:30:00",
         broker: {
@@ -42,7 +42,7 @@ const Dashboard = () => {
       },
       {
         id: "2",
-        title: "Documentation for textile shipment",
+        title: "Documentação para envio de têxteis",
         status: "in_progress",
         createdAt: "2025-04-28T14:20:00",
         broker: {
@@ -52,7 +52,7 @@ const Dashboard = () => {
       },
       {
         id: "3",
-        title: "Customs clearance for electronics",
+        title: "Desembaraço aduaneiro para eletrônicos",
         status: "completed",
         createdAt: "2025-04-25T09:15:00",
         broker: {
@@ -93,8 +93,14 @@ const Dashboard = () => {
   // Helper function to format status text
   const formatStatus = (status: string) => {
     switch (status) {
+      case "open":
+        return "Aberto";
       case "in_progress":
-        return "In Progress";
+        return "Em Andamento";
+      case "completed":
+        return "Concluído";
+      case "cancelled":
+        return "Cancelado";
       default:
         return status.charAt(0).toUpperCase() + status.slice(1);
     }
@@ -103,7 +109,7 @@ const Dashboard = () => {
   // Format date
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
+    return date.toLocaleDateString("pt-BR", {
       year: "numeric",
       month: "short",
       day: "numeric",
@@ -114,9 +120,9 @@ const Dashboard = () => {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+          <h1 className="text-2xl font-bold text-gray-900">Painel</h1>
           <p className="text-gray-600">
-            Welcome back, {profileType === "importer" 
+            Bem-vindo de volta, {profileType === "importer" 
               ? currentUser?.fullName || currentUser?.companyName 
               : currentUser?.fullName}
           </p>
@@ -125,7 +131,7 @@ const Dashboard = () => {
         {profileType === "importer" && (
           <Link to="/dashboard/tickets/create">
             <Button className="mt-4 md:mt-0">
-              Create New Ticket
+              Criar Novo Ticket
             </Button>
           </Link>
         )}
@@ -136,7 +142,7 @@ const Dashboard = () => {
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">
-              <p className="text-sm font-medium text-gray-500">Total Tickets</p>
+              <p className="text-sm font-medium text-gray-500">Total de Tickets</p>
               <p className="text-3xl font-bold text-gray-900 mt-1">{ticketStats.total}</p>
             </div>
           </CardContent>
@@ -145,7 +151,7 @@ const Dashboard = () => {
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">
-              <p className="text-sm font-medium text-amber-600">Open</p>
+              <p className="text-sm font-medium text-amber-600">Abertos</p>
               <p className="text-3xl font-bold text-gray-900 mt-1">{ticketStats.open}</p>
             </div>
           </CardContent>
@@ -154,7 +160,7 @@ const Dashboard = () => {
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">
-              <p className="text-sm font-medium text-blue-600">In Progress</p>
+              <p className="text-sm font-medium text-blue-600">Em Andamento</p>
               <p className="text-3xl font-bold text-gray-900 mt-1">{ticketStats.inProgress}</p>
             </div>
           </CardContent>
@@ -163,7 +169,7 @@ const Dashboard = () => {
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">
-              <p className="text-sm font-medium text-green-600">Completed</p>
+              <p className="text-sm font-medium text-green-600">Concluídos</p>
               <p className="text-3xl font-bold text-gray-900 mt-1">{ticketStats.completed}</p>
             </div>
           </CardContent>
@@ -172,7 +178,7 @@ const Dashboard = () => {
         <Card>
           <CardContent className="pt-6">
             <div className="text-center">
-              <p className="text-sm font-medium text-red-600">Cancelled</p>
+              <p className="text-sm font-medium text-red-600">Cancelados</p>
               <p className="text-3xl font-bold text-gray-900 mt-1">{ticketStats.cancelled}</p>
             </div>
           </CardContent>
@@ -182,8 +188,8 @@ const Dashboard = () => {
       {/* Recent Tickets */}
       <Card>
         <CardHeader>
-          <CardTitle>Recent Tickets</CardTitle>
-          <CardDescription>Your most recent ticket activity</CardDescription>
+          <CardTitle>Tickets Recentes</CardTitle>
+          <CardDescription>Sua atividade mais recente de tickets</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
@@ -192,9 +198,9 @@ const Dashboard = () => {
                 <tr>
                   <th className="px-4 py-3 text-left">Ticket</th>
                   <th className="px-4 py-3 text-left">Status</th>
-                  <th className="px-4 py-3 text-left">Created</th>
-                  <th className="px-4 py-3 text-left">{profileType === "importer" ? "Broker" : "Messages"}</th>
-                  <th className="px-4 py-3 text-right">Action</th>
+                  <th className="px-4 py-3 text-left">Criado em</th>
+                  <th className="px-4 py-3 text-left">{profileType === "importer" ? "Despachante" : "Mensagens"}</th>
+                  <th className="px-4 py-3 text-right">Ação</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
@@ -212,12 +218,12 @@ const Dashboard = () => {
                       {formatDate(ticket.createdAt)}
                     </td>
                     <td className="px-4 py-4 text-sm text-gray-500">
-                      {profileType === "importer" ? ticket.broker.name : `${ticket.messages} messages`}
+                      {profileType === "importer" ? ticket.broker.name : `${ticket.messages} mensagens`}
                     </td>
                     <td className="px-4 py-4 text-right">
                       <Link to={`/dashboard/tickets/${ticket.id}`}>
                         <Button variant="outline" size="sm">
-                          View
+                          Visualizar
                         </Button>
                       </Link>
                     </td>
@@ -229,11 +235,11 @@ const Dashboard = () => {
           
           {recentTickets.length === 0 && (
             <div className="text-center py-8">
-              <p className="text-gray-500">No tickets found.</p>
+              <p className="text-gray-500">Nenhum ticket encontrado.</p>
               {profileType === "importer" && (
                 <Link to="/dashboard/tickets/create" className="mt-2 inline-block">
                   <Button variant="outline" size="sm">
-                    Create your first ticket
+                    Crie seu primeiro ticket
                   </Button>
                 </Link>
               )}
@@ -243,7 +249,7 @@ const Dashboard = () => {
           {recentTickets.length > 0 && (
             <div className="mt-4 text-center">
               <Link to="/dashboard/tickets">
-                <Button variant="link">View all tickets</Button>
+                <Button variant="link">Ver todos os tickets</Button>
               </Link>
             </div>
           )}
