@@ -1,124 +1,146 @@
-// Exemplo adaptado de useRegisterForm.ts
-import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { supabase } from '@/integrations/supabase/client'
+// src/pages/Register.tsx
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import Header from "@/components/Header";
+import ProfileTypeSelector from "@/components/register/ProfileTypeSelector";
+import ProgressIndicator from "@/components/register/ProgressIndicator";
+import Step1ProfileInfo from "@/components/register/Step1ProfileInfo";
+import Step2Address from "@/components/register/Step2Address";
+import Step3Security from "@/components/register/Step3Security";
+import RegisterHeader from "@/components/register/RegisterHeader";
+import ErrorMessage from "@/components/register/ErrorMessage";
+import LoginLink from "@/components/register/LoginLink";
+import { useRegisterForm } from "@/hooks/useRegisterForm";
 
-export function useRegisterForm() {
-  // ... seus estados existentes ...
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [profileType, setProfileType] = useState<'importer' | 'broker'>('importer')
-  const [personType, setPersonType] = useState<'PF' | 'PJ'>('PF')
-  const [fullName, setFullName] = useState('')
-  const [companyName, setCompanyName] = useState('')
-  const [responsibleName, setResponsibleName] = useState('')
-  const [responsibleCpf, setResponsibleCpf] = useState('')
-  const [phone, setPhone] = useState('')
-  const [documentNumber, setDocumentNumber] = useState('')
-  const [cep, setCep] = useState('')
-  const [street, setStreet] = useState('')
-  const [number, setNumber] = useState('')
-  const [complement, setComplement] = useState('')
-  const [neighborhood, setNeighborhood] = useState('')
-  const [city, setCity] = useState('')
-  const [state, setState] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
-  const [apiError, setApiError] = useState<string | null>(null)
-  const navigate = useNavigate()
-
-  const handleSubmit = async () => {
-    setIsLoading(true)
-    setApiError(null)
-
-    // 1) cria o usuário no Auth
-    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-      email,
-      password
-    })
-    if (signUpError) {
-      setApiError(signUpError.message)
-      setIsLoading(false)
-      return
-    }
-
-    const user = signUpData.user
-    if (!user) {
-      setApiError('Erro inesperado: usuário não retornado.')
-      setIsLoading(false)
-      return
-    }
-
-    // 2) Atualiza o profile que já foi criado pelo trigger no banco
-    const updates = {
-      profile_type: profileType,
-      person_type: personType,
-      full_name: personType === 'PF' ? fullName : null,
-      company_name: personType === 'PJ' ? companyName : null,
-      responsible_name: personType === 'PJ' ? responsibleName : null,
-      responsible_cpf: personType === 'PJ' ? responsibleCpf : null,
-      phone,
-      document_number: documentNumber,
-      cep,
-      street,
-      number,
-      complement,
-      neighborhood,
-      city,
-      state
-    }
-
-    const { error: updateError } = await supabase
-      .from('profiles')
-      .update(updates)
-      .eq('id', user.id)
-
-    if (updateError) {
-      setApiError(updateError.message)
-      setIsLoading(false)
-      return
-    }
-
-    // 3) Tudo certo, leva ao dashboard (ou próxima etapa)
-    navigate('/dashboard')
-  }
-
-  return {
-    email,
-    setEmail,
-    password,
-    setPassword,
-    profileType,
-    setProfileType,
-    personType,
-    setPersonType,
-    fullName,
-    setFullName,
-    companyName,
-    setCompanyName,
-    responsibleName,
-    setResponsibleName,
-    responsibleCpf,
-    setResponsibleCpf,
-    phone,
-    setPhone,
-    documentNumber,
-    setDocumentNumber,
-    cep,
-    setCep,
-    street,
-    setStreet,
-    number,
-    setNumber,
-    complement,
-    setComplement,
-    neighborhood,
-    setNeighborhood,
-    city,
-    setCity,
-    state,
-    setState,
-    isLoading,
-    apiError,
+const Register: React.FC = () => {
+  const {
+    profileType, setProfileType,
+    personType, setPersonType,
+    isLoading, step, errors, apiError,
+    fullName, setFullName,
+    companyName, setCompanyName,
+    email, setEmail,
+    phone, setPhone,
+    documentNumber, setDocumentNumber,
+    responsibleName, setResponsibleName,
+    responsibleCpf, setResponsibleCpf,
+    cep, setCep,
+    street, setStreet,
+    number, setNumber,
+    complement, setComplement,
+    neighborhood, setNeighborhood,
+    city, setCity,
+    state, setState,
+    password, setPassword,
+    confirmPassword, setConfirmPassword,
+    handleNextStep,
+    handlePrevStep,
     handleSubmit,
-  }
-}
+    resetFields,
+  } = useRegisterForm();
+
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
+  const stepNames = ["Informações do Perfil", "Endereço", "Segurança"];
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) navigate("/dashboard");
+  }, [isAuthenticated, navigate]);
+
+  // Reset fields when profile or person type changes
+  useEffect(() => {
+    resetFields();
+  }, [profileType, personType]);
+
+  const renderStep = () => {
+    if (step === 1) return (
+      <Step1ProfileInfo
+        personType={personType}
+        setPersonType={setPersonType}
+        fullName={fullName}
+        setFullName={setFullName}
+        companyName={companyName}
+        setCompanyName={setCompanyName}
+        responsibleName={responsibleName}
+        setResponsibleName={setResponsibleName}
+        responsibleCpf={responsibleCpf}
+        setResponsibleCpf={setResponsibleCpf}
+        documentNumber={documentNumber}
+        setDocumentNumber={setDocumentNumber}
+        email={email}
+        setEmail={setEmail}
+        phone={phone}
+        setPhone={setPhone}
+        errors={errors}
+        onNext={handleNextStep}
+      />
+    );
+    if (step === 2) return (
+      <Step2Address
+        cep={cep}
+        setCep={setCep}
+        street={street}
+        setStreet={setStreet}
+        number={number}
+        setNumber={setNumber}
+        complement={complement}
+        setComplement={setComplement}
+        neighborhood={neighborhood}
+        setNeighborhood={setNeighborhood}
+        city={city}
+        setCity={setCity}
+        state={state}
+        setState={setState}
+        errors={errors}
+        onNext={handleNextStep}
+        onPrev={handlePrevStep}
+      />
+    );
+    if (step === 3) return (
+      <Step3Security
+        password={password}
+        setPassword={setPassword}
+        confirmPassword={confirmPassword}
+        setConfirmPassword={setConfirmPassword}
+        errors={errors}
+        onSubmit={handleSubmit}
+        onPrev={handlePrevStep}
+        isLoading={isLoading}
+      />
+    );
+    return null;
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      <Header />
+
+      <div className="flex-grow flex items-center justify-center bg-gray-50 py-12 px-4">
+        <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md">
+          <RegisterHeader />
+          <ErrorMessage message={apiError} />
+
+          <ProfileTypeSelector
+            profileType={profileType}
+            onProfileTypeChange={setProfileType}
+          />
+
+          <div className="mb-6">
+            <ProgressIndicator
+              currentStep={step}
+              totalSteps={3}
+              stepNames={stepNames}
+            />
+            {renderStep()}
+          </div>
+
+          <LoginLink />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Register;
