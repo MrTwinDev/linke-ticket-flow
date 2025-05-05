@@ -10,6 +10,8 @@ import Step1ProfileInfo from "@/components/register/Step1ProfileInfo";
 import Step2Address from "@/components/register/Step2Address";
 import Step3Security from "@/components/register/Step3Security";
 import { validateStep1, validateStep2, validateStep3 } from "@/utils/registerValidation";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 const Register = () => {
   const [profileType, setProfileType] = useState<ProfileType>("importer");
@@ -17,6 +19,7 @@ const Register = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState(1);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [apiError, setApiError] = useState<string | null>(null);
   
   // Step 1 fields
   const [fullName, setFullName] = useState("");
@@ -40,14 +43,23 @@ const Register = () => {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   
-  const { register } = useAuth();
+  const { register, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
   const stepNames = ["Informações do Perfil", "Endereço", "Segurança"];
   
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/dashboard");
+    }
+  }, [isAuthenticated, navigate]);
+  
   // Handle next step
   const handleNextStep = () => {
+    setApiError(null);
+    
     if (step === 1) {
       const validationErrors = validateStep1(
         email, phone, personType, fullName, documentNumber,
@@ -72,6 +84,7 @@ const Register = () => {
   
   // Handle previous step
   const handlePrevStep = () => {
+    setApiError(null);
     if (step > 1) {
       setStep(step - 1);
     }
@@ -80,6 +93,7 @@ const Register = () => {
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setApiError(null);
     
     const validationErrors = validateStep3(password, confirmPassword);
     setErrors(validationErrors);
@@ -120,7 +134,7 @@ const Register = () => {
         });
       }
       
-      await register(userData as any);
+      await register(userData);
       
       toast({
         title: "Registro bem-sucedido",
@@ -128,12 +142,13 @@ const Register = () => {
       });
       
       navigate("/dashboard");
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
+      setApiError(error.message || "Ocorreu um erro durante o registro.");
       toast({
         variant: "destructive",
         title: "Falha no registro",
-        description: "Ocorreu um erro durante o registro.",
+        description: error.message || "Ocorreu um erro durante o registro.",
       });
     } finally {
       setIsLoading(false);
@@ -143,6 +158,7 @@ const Register = () => {
   // Reset fields when profile or person type changes
   useEffect(() => {
     setErrors({});
+    setApiError(null);
     setFullName("");
     setCompanyName("");
     setResponsibleName("");
@@ -228,6 +244,13 @@ const Register = () => {
             </p>
           </div>
 
+          {apiError && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{apiError}</AlertDescription>
+            </Alert>
+          )}
+
           <ProfileTypeSelector 
             profileType={profileType} 
             onProfileTypeChange={setProfileType}
@@ -242,16 +265,7 @@ const Register = () => {
 
             {/* Main content area */}
             <div className="content-area">
-              {profileType === "importer" ? (
-                // Importer registration form
-                renderStepContent()
-              ) : (
-                // Broker registration form
-                <div className="text-sm text-center text-gray-600">
-                  O formulário de registro para despachante tem a mesma estrutura que o formulário de importador.
-                  A validação e campos são idênticos.
-                </div>
-              )}
+              {renderStepContent()}
             </div>
           </div>
 

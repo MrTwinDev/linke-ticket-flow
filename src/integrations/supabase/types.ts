@@ -9,7 +9,75 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          cep: string | null
+          city: string | null
+          company_name: string | null
+          complement: string | null
+          created_at: string | null
+          deleted: boolean | null
+          deleted_at: string | null
+          document_number: string | null
+          full_name: string | null
+          id: string
+          neighborhood: string | null
+          number: string | null
+          person_type: string | null
+          phone: string | null
+          profile_type: string | null
+          responsible_cpf: string | null
+          responsible_name: string | null
+          state: string | null
+          street: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          cep?: string | null
+          city?: string | null
+          company_name?: string | null
+          complement?: string | null
+          created_at?: string | null
+          deleted?: boolean | null
+          deleted_at?: string | null
+          document_number?: string | null
+          full_name?: string | null
+          id: string
+          neighborhood?: string | null
+          number?: string | null
+          person_type?: string | null
+          phone?: string | null
+          profile_type?: string | null
+          responsible_cpf?: string | null
+          responsible_name?: string | null
+          state?: string | null
+          street?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          cep?: string | null
+          city?: string | null
+          company_name?: string | null
+          complement?: string | null
+          created_at?: string | null
+          deleted?: boolean | null
+          deleted_at?: string | null
+          document_number?: string | null
+          full_name?: string | null
+          id?: string
+          neighborhood?: string | null
+          number?: string | null
+          person_type?: string | null
+          phone?: string | null
+          profile_type?: string | null
+          responsible_cpf?: string | null
+          responsible_name?: string | null
+          state?: string | null
+          street?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
