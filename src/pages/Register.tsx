@@ -1,10 +1,27 @@
 // Exemplo adaptado de useRegisterForm.ts
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { supabase } from '@/lib/supabaseClient'
+import { supabase } from '@/integrations/supabase/client'
 
 export function useRegisterForm() {
   // ... seus estados existentes ...
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [profileType, setProfileType] = useState<'importer' | 'broker'>('importer')
+  const [personType, setPersonType] = useState<'PF' | 'PJ'>('PF')
+  const [fullName, setFullName] = useState('')
+  const [companyName, setCompanyName] = useState('')
+  const [responsibleName, setResponsibleName] = useState('')
+  const [responsibleCpf, setResponsibleCpf] = useState('')
+  const [phone, setPhone] = useState('')
+  const [documentNumber, setDocumentNumber] = useState('')
+  const [cep, setCep] = useState('')
+  const [street, setStreet] = useState('')
+  const [number, setNumber] = useState('')
+  const [complement, setComplement] = useState('')
+  const [neighborhood, setNeighborhood] = useState('')
+  const [city, setCity] = useState('')
+  const [state, setState] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [apiError, setApiError] = useState<string | null>(null)
   const navigate = useNavigate()
@@ -66,7 +83,40 @@ export function useRegisterForm() {
   }
 
   return {
-    // ...restante do seu hook...
+    email,
+    setEmail,
+    password,
+    setPassword,
+    profileType,
+    setProfileType,
+    personType,
+    setPersonType,
+    fullName,
+    setFullName,
+    companyName,
+    setCompanyName,
+    responsibleName,
+    setResponsibleName,
+    responsibleCpf,
+    setResponsibleCpf,
+    phone,
+    setPhone,
+    documentNumber,
+    setDocumentNumber,
+    cep,
+    setCep,
+    street,
+    setStreet,
+    number,
+    setNumber,
+    complement,
+    setComplement,
+    neighborhood,
+    setNeighborhood,
+    city,
+    setCity,
+    state,
+    setState,
     isLoading,
     apiError,
     handleSubmit,
