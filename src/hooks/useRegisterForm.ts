@@ -1,9 +1,10 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth, ProfileType, PersonType } from "@/contexts/AuthContext";
 import { validateStep1, validateStep2, validateStep3 } from "@/utils/registerValidation";
-import { supabase } from "@/lib/supabaseClient";  // 🆕 importe o cliente Supabase
+import { supabase } from "@/integrations/supabase/client";  // Fixed import path
 
 export const useRegisterForm = () => {
   // ... estados omitidos para brevidade ...
@@ -78,6 +79,9 @@ export const useRegisterForm = () => {
         setApiError(
           "Por motivos de segurança, você só pode solicitar isto novamente após alguns segundos."
         );
+      } else if (error.message?.includes("violates row-level security policy")) {
+        // Handling RLS policy violation
+        setApiError("Erro de permissão: não foi possível atualizar o perfil.");
       } else {
         setApiError(error.message || "Ocorreu um erro durante o registro.");
       }
