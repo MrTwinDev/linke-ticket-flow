@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Info } from "lucide-react";
 
 interface Step3SecurityProps {
   password: string;
@@ -54,6 +55,14 @@ const Step3Security = ({
           {errors.confirmPassword && (
             <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>
           )}
+        </div>
+        
+        <div className="mt-2 text-xs text-gray-500 flex items-start gap-1">
+          <Info className="h-4 w-4 flex-shrink-0 mt-0.5" />
+          <p>
+            Após o registro, um email de confirmação será enviado. 
+            Você pode tentar criar apenas uma conta a cada 49 segundos por motivos de segurança.
+          </p>
         </div>
       </div>
 

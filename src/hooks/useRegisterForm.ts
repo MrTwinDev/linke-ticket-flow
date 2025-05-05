@@ -127,7 +127,15 @@ export const useRegisterForm = () => {
       navigate("/dashboard");
     } catch (error: any) {
       console.error(error);
-      setApiError(error.message || "Ocorreu um erro durante o registro.");
+      
+      // Handle rate limit error specifically
+      if (error.code === "over_email_send_rate_limit" || 
+          (error.message && error.message.includes("security purposes") && error.message.includes("after 49 seconds"))) {
+        setApiError("Por motivos de segurança, você só pode solicitar isto após 49 segundos. Por favor, aguarde e tente novamente.");
+      } else {
+        setApiError(error.message || "Ocorreu um erro durante o registro.");
+      }
+      
       toast({
         variant: "destructive",
         title: "Falha no registro",
