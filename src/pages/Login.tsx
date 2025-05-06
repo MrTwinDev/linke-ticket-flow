@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/Header";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLoginForm } from "@/hooks/useLoginForm";
+import { ProfileType } from "@/types/auth"; // Make sure we import ProfileType
 
 const Login: React.FC = () => {
   const {
@@ -56,7 +57,7 @@ const Login: React.FC = () => {
 
           <Tabs
             value={profileType}
-            onValueChange={(v) => setProfileType(v)}
+            onValueChange={(v: ProfileType) => setProfileType(v)} // Fix: explicitly type v as ProfileType
             className="w-full"
           >
             <TabsList className="grid grid-cols-2 mb-4">
