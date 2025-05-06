@@ -10,13 +10,15 @@ import { useAuth, ProfileType } from "@/contexts/AuthContext";
 import Header from "@/components/Header";
 
 const Login: React.FC = () => {
+  // Form fields
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [profileType, setProfileType] = useState<ProfileType>("importer");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  // local loading state
+  // Local submit loading
   const [isLoading, setIsLoading] = useState(false);
 
+  // Auth context
   const { login, isAuthenticated, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -44,8 +46,7 @@ const Login: React.FC = () => {
       navigate("/dashboard");
     } catch (err: any) {
       console.error("Login error:", err);
-      const msg =
-        err.message ||
+      const msg = err.message ||
         "Credenciais inválidas ou você não possui este tipo de perfil.";
       setErrorMessage(msg);
       toast({
@@ -61,7 +62,6 @@ const Login: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-
       <div className="flex-grow flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md">
           <div className="text-center">
@@ -80,8 +80,7 @@ const Login: React.FC = () => {
           <Tabs
             value={profileType}
             onValueChange={(val) => setProfileType(val as ProfileType)}
-            className="w-full"
-          >
+            className="w-full">
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="importer">Importador</TabsTrigger>
               <TabsTrigger value="broker">Despachante Aduaneiro</TabsTrigger>
@@ -105,10 +104,7 @@ const Login: React.FC = () => {
                   <div>
                     <div className="flex items-center justify-between">
                       <Label htmlFor="importer-password">Senha</Label>
-                      <Link
-                        to="#"
-                        className="text-linkeblue-600 text-sm hover:underline"
-                      >
+                      <Link to="#" className="text-linkeblue-600 text-sm hover:underline">
                         Esqueceu a senha?
                       </Link>
                     </div>
@@ -146,10 +142,7 @@ const Login: React.FC = () => {
                   <div>
                     <div className="flex items-center justify-between">
                       <Label htmlFor="broker-password">Senha</Label>
-                      <Link
-                        to="#"
-                        className="text-linkeblue-600 text-sm hover:underline"
-                      >
+                      <Link to="#" className="text-linkeblue-600 text-sm hover:underline">
                         Esqueceu a senha?
                       </Link>
                     </div>
@@ -173,10 +166,7 @@ const Login: React.FC = () => {
           <div className="text-center mt-6">
             <p className="text-sm text-gray-600">
               Não tem uma conta?{' '}
-              <Link
-                to="/register"
-                className="text-linkeblue-600 hover:underline"
-              >
+              <Link to="/register" className="text-linkeblue-600 hover:underline">
                 Registre-se agora
               </Link>
             </p>
