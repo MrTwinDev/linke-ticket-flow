@@ -94,7 +94,7 @@ const Login: React.FC = () => {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="voce@empresa.com"
-                      disabled={authLoading}
+                      disabled={isLoading}
                     />
                   </div>
                   <div>
@@ -113,11 +113,11 @@ const Login: React.FC = () => {
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      disabled={authLoading}
+                      disabled={isLoading}
                     />
                   </div>
                 </div>
-                <Button type="submit" className="w-full" disabled={authLoading}>
+                <Button type="submit" className="w-full" disabled={isLoading}>
                   {authLoading ? "Entrando..." : "Entrar como Importador"}
                 </Button>
               </form>
@@ -135,7 +135,7 @@ const Login: React.FC = () => {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       placeholder="voce@despachante.com"
-                      disabled={authLoading}
+                      disabled={isLoading}
                     />
                   </div>
                   <div>
@@ -154,11 +154,11 @@ const Login: React.FC = () => {
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      disabled={authLoading}
+                      disabled={isLoading}
                     />
                   </div>
                 </div>
-                <Button type="submit" className="w-full" disabled={authLoading}>
+                <Button type="submit" className="w-full" disabled={isLoading}>
                   {authLoading ? "Entrando..." : "Entrar como Despachante"}
                 </Button>
               </form>
