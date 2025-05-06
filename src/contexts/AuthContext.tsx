@@ -166,6 +166,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         if (profError) throw profError;
         if (prof.profile_type !== requestedProfile) {
           await supabase.auth.signOut();
+          // Clear local state immediately
+          setCurrentUser(null);
+          setProfileType(null);
+          setIsAuthenticated(false);
           throw new Error(
             `You do not have an ${requestedProfile} account associated with this email.`
           );
@@ -184,6 +188,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setIsLoading(true);
     try {
       await supabase.auth.signOut();
+      // Clear local auth state immediately
+      setCurrentUser(null);
+      setProfileType(null);
+      setIsAuthenticated(false);
     } catch (error) {
       console.error('Logout error:', error);
       toast({
@@ -200,11 +208,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const register = async (userData: RegisterData) => {
     setIsLoading(true);
     try {
-      // 1) Create auth user
-      const {
-        data: signUpData,
-        error: signUpError
-      } = await supabase.auth.signUp({
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email: userData.email,
         password: userData.password,
       });
@@ -212,19 +216,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const user = signUpData.user;
       if (!user) throw new Error('Falha ao criar usuário');
 
-      // 2) Update profile (trigger has inserted row)
       const updates: Record<string, any> = {
-        profile_type: userData.profileType,
-        person_type:  userData.personType,
-        phone:         userData.phone,
+        profile_type:    userData.profileType,
+        person_type:     userData.personType,
+        phone:           userData.phone,
         document_number: userData.documentNumber,
-        cep:          userData.address.cep,
-        street:       userData.address.street,
-        number:       userData.address.number,
-        complement:   userData.address.complement || null,
-        neighborhood: userData.address.neighborhood,
-        city:         userData.address.city,
-        state:        userData.address.state,
+        cep:             userData.address.cep,
+        street:          userData.address.street,
+        number:          userData.address.number,
+        complement:      userData.address.complement || null,
+        neighborhood:    userData.address.neighborhood,
+        city:            userData.address.city,
+        state:           userData.address.state,
       };
       if (userData.personType === 'PF') {
         updates.full_name = userData.fullName;
@@ -241,7 +244,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (updateError) throw updateError;
     } catch (error: any) {
       console.error('Registration error:', error);
-      // Cleanup auth if something failed
       await supabase.auth.signOut();
       throw error;
     } finally {
@@ -263,17 +265,3 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 };
 
 export { ProfileType, PersonType };
-
-// Note: Ensure you have the trigger on auth.users in your Supabase SQL:
-// CREATE OR REPLACE FUNCTION public.handle_new_user()
-// RETURNS TRIGGER AS $$
-// BEGIN
-//   INSERT INTO public.profiles (id) VALUES (NEW.id);
-//   RETURN NEW;
-// END;
-// $$ LANGUAGE plpgsql SECURITY DEFINER;
-//
-// DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-// CREATE TRIGGER on_auth_user_created
-// AFTER INSERT ON auth.users
-// FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
