@@ -196,12 +196,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const register = async (data: RegisterData) => {
     setIsLoading(true);
     try {
-      const { data: signUpData, error: signUpErr } = await supabase.auth.signUp({ email: data.email, password: data.password });
+      // 1) Cria usuário no Auth
+      const { data: signUpData, error: signUpErr } = await supabase.auth.signUp({
+        email: data.email,
+        password: data.password,
+      });
       if (signUpErr) throw signUpErr;
       const user = signUpData.user;
       if (!user) throw new Error('Falha ao criar usuário.');
 
-      // Atualiza perfil (trigger já inseriu linha)
+      // 2) Atualiza perfil (trigger já inseriu a linha)
       const updates: any = {
         profile_type:    data.profileType,
         person_type:     data.personType,
@@ -222,24 +226,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         updates.responsible_name = data.responsibleName;
         updates.responsible_cpf  = data.responsibleCpf;
       }
-      const { error: updErr } = await supabase.from('profiles').update(updates).eq('id', user.id);
+      const { error: updErr } = await supabase
+        .from('profiles')
+        .update(updates)
+        .eq('id', user.id);
       if (updErr) throw updErr;
-      
-      // Automatically sign in the user after successful registration
+
+      // 3) LOGIN AUTOMÁTICO APÓS O REGISTRO
       const { error: signInErr } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,
       });
-      
       if (signInErr) {
-        // If sign-in fails, sign out and report the error
+        console.error('Erro no login automático:', signInErr);
         await supabase.auth.signOut();
         throw new Error(`Registro concluído, mas falha ao fazer login: ${signInErr.message}`);
       }
-      
-      // Note: No need to manually update state here, as the onAuthStateChange listener
-      // will automatically update the state when the user is signed in
-      
+
       toast({
         title: "Registro bem-sucedido",
         description: "Sua conta foi criada com sucesso e você foi autenticado.",
@@ -268,5 +271,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// Re-export types for convenience
+// Re-export de tipos para conveniência
 export type { User as AuthUser };
+
