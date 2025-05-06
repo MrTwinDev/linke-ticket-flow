@@ -21,7 +21,5 @@ export const supabase = createClient<Database>(
       persistSession: true,
       autoRefreshToken: true,
     },
-    // opcional: define timeout de requisição, logging etc
-    // global: { fetch: customFetch },
   }
 );
