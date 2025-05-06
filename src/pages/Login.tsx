@@ -1,55 +1,39 @@
+
 // src/pages/Login.tsx
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/hooks/use-toast";
 import { useAuth, ProfileType } from "@/contexts/AuthContext";
 import Header from "@/components/Header";
 import { useLoginForm } from "@/hooks/useLoginForm";
 
 const Login: React.FC = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [profileType, setProfileType] = useState<ProfileType>("importer");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const { login, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { 
+    email, 
+    setEmail, 
+    password, 
+    setPassword, 
+    profileType, 
+    setProfileType, 
+    isLoading, 
+    error, 
+    handleSubmit 
+  } = useLoginForm();
+  
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
-
-  // Redireciona se já autenticado
+  
+  // Redirect if already authenticated
   useEffect(() => {
+    console.log("Login page - auth state:", { isAuthenticated, authLoading });
     if (!authLoading && isAuthenticated) {
+      console.log("User is authenticated, redirecting to dashboard");
       navigate("/dashboard");
     }
   }, [authLoading, isAuthenticated, navigate]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setIsLoading(true);
-
-    try {
-      await login(email, password, profileType);
-      toast({
-        title: "Login bem-sucedido",
-        description: `Bem-vindo de volta, ${
-          profileType === "importer" ? "importador" : "despachante"
-        }.`,
-      });
-      navigate("/dashboard");
-    } catch (err: any) {
-      const msg = err.message || "Erro ao fazer login.";
-      setError(msg);
-      toast({ variant: "destructive", title: "Falha no login", description: msg });
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   return (
     <div className="min-h-screen flex flex-col">

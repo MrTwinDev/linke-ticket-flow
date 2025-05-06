@@ -31,10 +31,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Auth state listener
   useEffect(() => {
+    console.log("Setting up auth state listener");
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         setIsLoading(true);
+        console.log("Auth state changed:", _event, !!session);
+        
         if (session?.user) {
           try {
             const { data: profile, error } = await supabase
@@ -70,6 +73,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               user.responsibleCpf = profile.responsible_cpf || undefined;
             }
 
+            console.log("User profile loaded", { profileType: profile.profile_type });
             setCurrentUser(user);
             setProfileType(profile.profile_type as ProfileType);
             setIsAuthenticated(true);
@@ -80,6 +84,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             setIsAuthenticated(false);
           }
         } else {
+          console.log("No active session");
           setCurrentUser(null);
           setProfileType(null);
           setIsAuthenticated(false);
@@ -89,7 +94,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     );
 
     // THEN check for existing session
+    console.log("Checking for existing session");
     supabase.auth.getSession().then(({ data }) => {
+      console.log("Initial session check:", !!data.session);
       if (!data.session) setIsLoading(false);
     });
 

@@ -22,9 +22,13 @@ export function useLoginForm() {
     setIsLoading(true);
     
     try {
-      console.log("Login attempt:", { email, password, profileType });
+      console.log("Login attempt initiated:", { email, profileType });
+      
+      // Adding additional logging before the login call
+      console.log("About to call login method from AuthContext");
       await login(email, password, profileType);
       
+      console.log("Login successful, showing toast and navigating");
       toast({
         title: "Login bem-sucedido",
         description: `Bem-vindo de volta, ${profileType === "importer" ? "importador" : "despachante"}.`,
