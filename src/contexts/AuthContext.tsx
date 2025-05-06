@@ -1,11 +1,12 @@
+
 // src/contexts/AuthContext.tsx
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 // Define user types
-type ProfileType = "importer" | "broker";
-type PersonType = "PF" | "PJ";
+export type ProfileType = "importer" | "broker";
+export type PersonType = "PF" | "PJ";
 
 export interface User {
   id: string;
@@ -96,8 +97,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               const user: User = {
                 id: session.user.id,
                 email: session.user.email || '',
-                profileType: profile.profile_type,
-                personType: profile.person_type,
+                profileType: profile.profile_type as ProfileType,
+                personType: profile.person_type as PersonType,
                 phone: profile.phone,
                 documentNumber: profile.document_number,
                 address: {
@@ -118,7 +119,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 user.responsibleCpf = profile.responsible_cpf;
               }
               setCurrentUser(user);
-              setProfileType(profile.profile_type);
+              setProfileType(profile.profile_type as ProfileType);
               setIsAuthenticated(true);
             }
           } catch (error) {
@@ -263,5 +264,3 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
-
-export { ProfileType, PersonType };
