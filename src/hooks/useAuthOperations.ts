@@ -29,6 +29,16 @@ export function useAuthOperations({
     try {
       console.log("Auth context login attempt with:", { email, requestedProfile });
       
+      // Clear any existing auth state to prevent issues
+      localStorage.removeItem('sb-qainlosbrisovatxvxxx-auth-token');
+      // Clear any other potential auth tokens
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+          localStorage.removeItem(key);
+        }
+      });
+      
+      // Attempt to sign in with provided credentials
       const { data, error } = await supabase.auth.signInWithPassword({ 
         email, 
         password 
