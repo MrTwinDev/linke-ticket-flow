@@ -1,163 +1,91 @@
-
 // src/pages/Login.tsx
-import { useLoginForm } from "@/hooks/useLoginForm";
-import React, { useState, useEffect } from "react";
+import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/hooks/use-toast";
+import { useLoginForm } from "@/hooks/useLoginForm";
 import { useAuth, ProfileType } from "@/contexts/AuthContext";
 import Header from "@/components/Header";
-import { useLoginForm } from "@/hooks/useLoginForm";
 
 const Login: React.FC = () => {
-  // Get login form state and handlers from custom hook
   const {
-    email,
-    setEmail,
-    password, 
-    setPassword,
-    profileType,
-    setProfileType,
-    isLoading,
-    error: errorMessage,
+    email, setEmail,
+    password, setPassword,
+    profileType, setProfileType,
+    isLoading, error: errorMessage,
     handleSubmit
   } = useLoginForm();
 
-  // Auth context for authentication status check
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect if already logged in
   useEffect(() => {
-    if (!authLoading && isAuthenticated) {
-      navigate("/dashboard");
-    }
+    if (!authLoading && isAuthenticated) navigate("/dashboard");
   }, [authLoading, isAuthenticated, navigate]);
 
   return (
     <div className="min-h-screen flex flex-col">
-      <Header />
-      <div className="flex-grow flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md">
-          <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-900">Bem-vindo de volta</h2>
-            <p className="mt-2 text-sm text-gray-600">
-              Por favor, insira suas credenciais para acessar sua conta
-            </p>
-          </div>
+      <Header/>
+      <div className="flex-grow flex items-center justify-center bg-gray-50 p-8">
+        <div className="max-w-md w-full bg-white p-8 rounded shadow space-y-6">
+          <h2 className="text-2xl font-bold text-center">Bem-vindo de volta</h2>
+          {errorMessage && <div className="p-2 bg-red-100 text-red-800 rounded">{errorMessage}</div>}
 
-          {errorMessage && (
-            <div className="p-3 bg-red-100 text-red-800 rounded">
-              {errorMessage}
-            </div>
-          )}
-
-          <Tabs
-            value={profileType}
-            onValueChange={(val) => setProfileType(val as ProfileType)}
-            className="w-full">
-            <TabsList className="grid w-full grid-cols-2 mb-6">
+          <Tabs value={profileType} onValueChange={val => setProfileType(val as ProfileType)}>
+            <TabsList className="grid grid-cols-2 mb-4">
               <TabsTrigger value="importer">Importador</TabsTrigger>
-              <TabsTrigger value="broker">Despachante Aduaneiro</TabsTrigger>
+              <TabsTrigger value="broker">Despachante</TabsTrigger>
             </TabsList>
 
             <TabsContent value="importer">
-              <form className="space-y-6" onSubmit={handleSubmit}>
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="importer-email">Endereço de e-mail</Label>
-                    <Input
-                      id="importer-email"
-                      type="email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="voce@empresa.com"
-                      disabled={isLoading}
-                    />
-                  </div>
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="importer-password">Senha</Label>
-                      <Link to="#" className="text-linkeblue-600 text-sm hover:underline">
-                        Esqueceu a senha?
-                      </Link>
-                    </div>
-                    <Input
-                      id="importer-password"
-                      type="password"
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      disabled={isLoading}
-                    />
-                  </div>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <Label>E-mail</Label>
+                  <Input
+                    type="email" value={email} onChange={e => setEmail(e.target.value)}
+                    required disabled={isLoading}/>
                 </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <div>
+                  <Label>Senha</Label>
+                  <Input
+                    type="password" value={password} onChange={e => setPassword(e.target.value)}
+                    required disabled={isLoading}/>
+                </div>
+                <Button type="submit" disabled={isLoading} className="w-full">
                   {isLoading ? "Entrando..." : "Entrar como Importador"}
                 </Button>
               </form>
             </TabsContent>
 
             <TabsContent value="broker">
-              <form className="space-y-6" onSubmit={handleSubmit}>
-                <div className="space-y-4">
-                  <div>
-                    <Label htmlFor="broker-email">Endereço de e-mail</Label>
-                    <Input
-                      id="broker-email"
-                      type="email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      placeholder="voce@despachante.com"
-                      disabled={isLoading}
-                    />
-                  </div>
-                  <div>
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="broker-password">Senha</Label>
-                      <Link to="#" className="text-linkeblue-600 text-sm hover:underline">
-                        Esqueceu a senha?
-                      </Link>
-                    </div>
-                    <Input
-                      id="broker-password"
-                      type="password"
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      disabled={isLoading}
-                    />
-                  </div>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <Label>E-mail</Label>
+                  <Input
+                    type="email" value={email} onChange={e => setEmail(e.target.value)}
+                    required disabled={isLoading}/>
                 </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <div>
+                  <Label>Senha</Label>
+                  <Input
+                    type="password" value={password} onChange={e => setPassword(e.target.value)}
+                    required disabled={isLoading}/>
+                </div>
+                <Button type="submit" disabled={isLoading} className="w-full">
                   {isLoading ? "Entrando..." : "Entrar como Despachante"}
                 </Button>
               </form>
             </TabsContent>
           </Tabs>
 
-          <div className="text-center mt-6">
-            <p className="text-sm text-gray-600">
-              Não tem uma conta?{' '}
-              <Link to="/register" className="text-linkeblue-600 hover:underline">
-                Registre-se agora
-              </Link>
-            </p>
-          </div>
-
-          <div className="text-center mt-4 text-sm text-gray-500">
-            <p>
-              Contas de Demonstração:<br />
-              Importador: importer@example.com<br />
-              Despachante: broker@example.com<br />
-              Senha para ambos: password
-            </p>
-          </div>
+          <p className="text-center text-sm">
+            Não tem conta?{" "}
+            <Link to="/register" className="text-blue-600 hover:underline">
+              Registre-se
+            </Link>
+          </p>
         </div>
       </div>
     </div>
