@@ -1,3 +1,4 @@
+
 // src/contexts/AuthContext.tsx
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -224,6 +225,26 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
       const { error: updErr } = await supabase.from('profiles').update(updates).eq('id', user.id);
       if (updErr) throw updErr;
+      
+      // Automatically sign in the user after successful registration
+      const { error: signInErr } = await supabase.auth.signInWithPassword({
+        email: data.email,
+        password: data.password,
+      });
+      
+      if (signInErr) {
+        // If sign-in fails, sign out and report the error
+        await supabase.auth.signOut();
+        throw new Error(`Registro concluído, mas falha ao fazer login: ${signInErr.message}`);
+      }
+      
+      // Note: No need to manually update state here, as the onAuthStateChange listener
+      // will automatically update the state when the user is signed in
+      
+      toast({
+        title: "Registro bem-sucedido",
+        description: "Sua conta foi criada com sucesso e você foi autenticado.",
+      });
     } catch (err: any) {
       console.error('Erro no cadastro:', err);
       await supabase.auth.signOut();
@@ -247,3 +268,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     </AuthContext.Provider>
   );
 };
+
+// Re-export types for convenience
+export type { User as AuthUser, RegisterData };
