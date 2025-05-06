@@ -14,6 +14,8 @@ import Tickets from "./pages/Tickets";
 import TicketDetail from "./pages/TicketDetail";
 import CreateTicket from "./pages/CreateTicket";
 import ProfilePage from "./pages/ProfilePage";
+import Support from "./pages/Support";
+import FAQ from "./pages/FAQ";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -37,6 +39,8 @@ const App = () => (
               <Route path="tickets/:id" element={<TicketDetail />} />
               <Route path="tickets/create" element={<CreateTicket />} />
               <Route path="profile" element={<ProfilePage />} />
+              <Route path="support" element={<Support />} />
+              <Route path="faq" element={<FAQ />} />
             </Route>
             
             <Route path="*" element={<NotFound />} />
