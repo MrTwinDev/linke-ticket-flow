@@ -1,46 +1,30 @@
 
 // src/pages/Login.tsx
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/Header";
-import { useAuth, ProfileType } from "@/contexts/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { useLoginForm } from "@/hooks/useLoginForm";
 
 const Login: React.FC = () => {
-  // Local form state
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [profileType, setProfileType] = useState<ProfileType>("importer");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const {
+    email,
+    setEmail,
+    password,
+    setPassword,
+    profileType,
+    setProfileType,
+    isLoading,
+    error,
+    handleSubmit
+  } = useLoginForm();
 
-  const { login, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
-
-  // Handle form submission
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    setIsLoading(true);
-    
-    try {
-      console.log("Login.tsx • Submitting form with:", { email, password, profileType });
-      
-      // Call the login function from AuthContext
-      await login(email, password, profileType);
-      
-      // If login succeeds, navigate to dashboard
-      // This happens in the useEffect below when isAuthenticated changes
-    } catch (err: any) {
-      console.error("Login.tsx • Login failed:", err);
-      setError(err.message || "Credenciais inválidas ou perfil incorreto");
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   // Redirect after authentication
   useEffect(() => {
@@ -72,7 +56,7 @@ const Login: React.FC = () => {
 
           <Tabs
             value={profileType}
-            onValueChange={(v) => setProfileType(v as ProfileType)}
+            onValueChange={(v) => setProfileType(v)}
             className="w-full"
           >
             <TabsList className="grid grid-cols-2 mb-4">
