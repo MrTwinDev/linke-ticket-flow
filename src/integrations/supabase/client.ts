@@ -1,25 +1,27 @@
-
 // src/integrations/supabase/client.ts
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-// Use direct URLs instead of environment variables
-const SUPABASE_URL = "https://qainlosbrisovatxvxxx.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhaW5sb3Nicmlzb3ZhdHh2eHh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY0NjkzMzQsImV4cCI6MjA2MjA0NTMzNH0.IUmUKVIU4mjE7iuwbm-V-pGbUDjP2dj_jAl9fzILJXs";
+// Carrega do .env (VITE_*) — certifique-se de ter no seu .env:
+// VITE_SUPABASE_URL=https://…
+// VITE_SUPABASE_ANON_KEY=eyJ…
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 
-// Add console log to verify client configuration
-console.log('Supabase client initialization with:', { 
-  url: SUPABASE_URL, 
-  keyLength: SUPABASE_PUBLISHABLE_KEY?.length || 0,
-  keyPrefix: SUPABASE_PUBLISHABLE_KEY?.substring(0, 10) || 'undefined'
-});
+// DEBUG: confira no console se as variáveis estão corretas
+console.log('[supabase] URL:', SUPABASE_URL);
+console.log('[supabase] ANON_KEY length:', SUPABASE_ANON_KEY?.length);
+console.log('[supabase] ANON_KEY prefix:', SUPABASE_ANON_KEY?.substring(0,10));
 
-// Import the supabase client like this:
-// import { supabase } from "@/integrations/supabase/client";
-
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
-  auth: {
-    persistSession: true,
-    autoRefreshToken: true,
+export const supabase = createClient<Database>(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY,
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+    },
+    // opcional: define timeout de requisição, logging etc
+    // global: { fetch: customFetch },
   }
-});
+);
