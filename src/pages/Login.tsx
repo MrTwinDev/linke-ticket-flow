@@ -5,9 +5,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import Header from "@/components/Header";
-import { useAuth, ProfileType } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth, ProfileType } from "@/contexts/AuthContext";
+import Header from "@/components/Header";
+import { useLoginForm } from "@/hooks/useLoginForm";
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -147,4 +148,3 @@ const Login: React.FC = () => {
 };
 
 export default Login;
-

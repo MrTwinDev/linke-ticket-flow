@@ -1,3 +1,4 @@
+
 // src/contexts/AuthContext.tsx
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -78,6 +79,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   // Escuta mudanças de sessão
   useEffect(() => {
+    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         setIsLoading(true);
@@ -134,7 +136,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     );
 
-    // Verificação inicial de sessão
+    // THEN check for existing session
     supabase.auth.getSession().then(({ data }) => {
       if (!data.session) setIsLoading(false);
     });
@@ -150,19 +152,38 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   ) => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
+      console.log("Auth context login attempt with:", { email, requestedProfile });
+      
+      const { data, error } = await supabase.auth.signInWithPassword({ 
+        email, 
+        password 
+      });
+      
+      if (error) {
+        console.error("Supabase auth error:", error);
+        throw error;
+      }
+      
       if (data.user) {
+        console.log("User authenticated, checking profile type");
         const { data: prof, error: profErr } = await supabase
           .from('profiles')
           .select('profile_type')
           .eq('id', data.user.id)
           .single();
-        if (profErr) throw profErr;
+          
+        if (profErr) {
+          console.error("Profile fetch error:", profErr);
+          throw profErr;
+        }
+        
         if (prof.profile_type !== requestedProfile) {
+          console.error("Profile type mismatch:", { requested: requestedProfile, actual: prof.profile_type });
           await supabase.auth.signOut();
           throw new Error(`Você não possui um perfil ${requestedProfile} para este e-mail.`);
         }
+        
+        console.log("Login successful with matching profile type");
       }
     } catch (err: any) {
       console.error('Erro no login:', err);
@@ -273,4 +294,3 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
 // Re-export de tipos para conveniência
 export type { User as AuthUser };
-

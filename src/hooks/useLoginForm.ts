@@ -1,3 +1,4 @@
+
 // src/hooks/useLoginForm.ts
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -19,21 +20,41 @@ export function useLoginForm() {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
+    
     try {
+      console.log("Login attempt:", { email, password, profileType });
       await login(email, password, profileType);
+      
       toast({
         title: "Login bem-sucedido",
         description: `Bem-vindo de volta, ${profileType === "importer" ? "importador" : "despachante"}.`,
       });
+      
       navigate("/dashboard");
     } catch (err: any) {
+      console.error("Login error details:", err);
       const msg = err.message || "Erro ao fazer login.";
       setError(msg);
-      toast({ variant: "destructive", title: "Falha no login", description: msg });
+      
+      toast({ 
+        variant: "destructive", 
+        title: "Falha no login", 
+        description: msg 
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
-  return { email, setEmail, password, setPassword, profileType, setProfileType, isLoading, error, handleSubmit };
+  return {
+    email,
+    setEmail,
+    password,
+    setPassword,
+    profileType,
+    setProfileType,
+    isLoading,
+    error,
+    handleSubmit
+  };
 }
