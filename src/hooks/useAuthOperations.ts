@@ -69,6 +69,9 @@ export function useAuthOperations({
         }
         
         console.log("Login successful with matching profile type");
+        // Set authenticated state here to trigger redirect
+        setIsAuthenticated(true);
+        return data;
       }
     } catch (err: any) {
       console.error('Login error:', err);
@@ -148,19 +151,44 @@ export function useAuthOperations({
       if (updErr) throw updErr;
 
       // 3) AUTOMATIC LOGIN AFTER REGISTRATION
-      const { error: signInErr } = await supabase.auth.signInWithPassword({
+      const { data: signInData, error: signInErr } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,
       });
+      
       if (signInErr) {
         console.error('Error in automatic login:', signInErr);
         throw new Error(`Registration completed, but login failed: ${signInErr.message}`);
+      }
+      
+      // Explicitly set authentication state after successful registration
+      if (signInData.user) {
+        setIsAuthenticated(true);
+        setCurrentUser({
+          id: signInData.user.id,
+          email: signInData.user.email || '',
+          profileType: data.profileType,
+          personType: data.personType,
+          phone: data.phone,
+          documentNumber: data.documentNumber,
+          address: data.address,
+          ...(data.personType === 'PF' 
+              ? { fullName: data.fullName } 
+              : {
+                  companyName: data.companyName,
+                  responsibleName: data.responsibleName,
+                  responsibleCpf: data.responsibleCpf
+                })
+        });
+        setProfileType(data.profileType);
       }
 
       toast({
         title: "Registro bem-sucedido",
         description: "Sua conta foi criada com sucesso e você foi autenticado.",
       });
+      
+      return signInData;
     } catch (err: any) {
       console.error('Registration error:', err);
       throw err;

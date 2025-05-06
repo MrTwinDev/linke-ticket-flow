@@ -46,7 +46,10 @@ const Register: React.FC = () => {
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (isAuthenticated) navigate("/dashboard");
+    if (isAuthenticated) {
+      console.log("Register: User is authenticated, redirecting to dashboard");
+      navigate("/dashboard");
+    }
   }, [isAuthenticated, navigate]);
 
   // Reset fields when profile or person type changes
