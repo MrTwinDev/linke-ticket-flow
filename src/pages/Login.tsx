@@ -1,3 +1,4 @@
+
 // src/pages/Login.tsx
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -8,19 +9,24 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth, ProfileType } from "@/contexts/AuthContext";
 import Header from "@/components/Header";
+import { useLoginForm } from "@/hooks/useLoginForm";
 
 const Login: React.FC = () => {
-  // Form fields
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [profileType, setProfileType] = useState<ProfileType>("importer");
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  // Local submit loading
-  const [isLoading, setIsLoading] = useState(false);
+  // Get login form state and handlers from custom hook
+  const {
+    email,
+    setEmail,
+    password, 
+    setPassword,
+    profileType,
+    setProfileType,
+    isLoading,
+    error: errorMessage,
+    handleSubmit
+  } = useLoginForm();
 
-  // Auth context
-  const { login, isAuthenticated, isLoading: authLoading } = useAuth();
-  const { toast } = useToast();
+  // Auth context for authentication status check
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
 
   // Redirect if already logged in
@@ -29,35 +35,6 @@ const Login: React.FC = () => {
       navigate("/dashboard");
     }
   }, [authLoading, isAuthenticated, navigate]);
-
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setErrorMessage(null);
-    setIsLoading(true);
-
-    try {
-      await login(email, password, profileType);
-      toast({
-        title: "Login bem-sucedido",
-        description: `Bem-vindo de volta à sua conta de ${
-          profileType === "importer" ? "importador" : "despachante"
-        }.`,
-      });
-      navigate("/dashboard");
-    } catch (err: any) {
-      console.error("Login error:", err);
-      const msg = err.message ||
-        "Credenciais inválidas ou você não possui este tipo de perfil.";
-      setErrorMessage(msg);
-      toast({
-        variant: "destructive",
-        title: "Falha no login",
-        description: msg,
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -87,7 +64,7 @@ const Login: React.FC = () => {
             </TabsList>
 
             <TabsContent value="importer">
-              <form className="space-y-6" onSubmit={handleLogin}>
+              <form className="space-y-6" onSubmit={handleSubmit}>
                 <div className="space-y-4">
                   <div>
                     <Label htmlFor="importer-email">Endereço de e-mail</Label>
@@ -125,7 +102,7 @@ const Login: React.FC = () => {
             </TabsContent>
 
             <TabsContent value="broker">
-              <form className="space-y-6" onSubmit={handleLogin}>
+              <form className="space-y-6" onSubmit={handleSubmit}>
                 <div className="space-y-4">
                   <div>
                     <Label htmlFor="broker-email">Endereço de e-mail</Label>
