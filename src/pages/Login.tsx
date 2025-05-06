@@ -17,7 +17,7 @@ const Login: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const { isAuthenticated, isLoading: authLoading, login } = useAuth();
+  const { login, isAuthenticated, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
 
   // Handle form submission
@@ -25,15 +25,13 @@ const Login: React.FC = () => {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
-    
     try {
       console.log("Login.tsx • Submitting form with:", { email, password, profileType });
       await login(email, password, profileType);
-      console.log("Login.tsx • Login successful, navigating to dashboard");
       navigate("/dashboard");
     } catch (err: any) {
       console.error("Login.tsx • Login failed:", err);
-      setError(err?.message || "Credenciais inválidas ou perfil incorreto");
+      setError(err.message || "Credenciais inválidas ou perfil incorreto");
     } finally {
       setIsLoading(false);
     }
