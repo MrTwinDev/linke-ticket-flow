@@ -8,6 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/Header";
 import { useAuth, ProfileType } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
 
 const Login: React.FC = () => {
   // Local form state
@@ -25,9 +26,24 @@ const Login: React.FC = () => {
     e.preventDefault();
     setError(null);
     setIsLoading(true);
+    
     try {
       console.log("Login.tsx • Submitting form with:", { email, password, profileType });
+      
+      // Clear any existing auth state to prevent issues
+      localStorage.removeItem('sb-qainlosbrisovatxvxxx-auth-token');
+      // Clear any other potential auth tokens
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+          localStorage.removeItem(key);
+        }
+      });
+      
+      // Call the login function from AuthContext
       await login(email, password, profileType);
+      
+      // If login succeeds, navigate to dashboard
+      // This will run only if login doesn't throw an error
       navigate("/dashboard");
     } catch (err: any) {
       console.error("Login.tsx • Login failed:", err);

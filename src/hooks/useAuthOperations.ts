@@ -102,6 +102,15 @@ export function useAuthOperations({
   const register = async (data: RegisterData) => {
     setIsLoading(true);
     try {
+      // Clear any existing auth state to prevent issues
+      localStorage.removeItem('sb-qainlosbrisovatxvxxx-auth-token');
+      // Clear any other potential auth tokens
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+          localStorage.removeItem(key);
+        }
+      });
+
       // 1) Create user in Auth
       const { data: signUpData, error: signUpErr } = await supabase.auth.signUp({
         email: data.email,
@@ -145,7 +154,6 @@ export function useAuthOperations({
       });
       if (signInErr) {
         console.error('Error in automatic login:', signInErr);
-        await supabase.auth.signOut();
         throw new Error(`Registration completed, but login failed: ${signInErr.message}`);
       }
 
@@ -155,7 +163,6 @@ export function useAuthOperations({
       });
     } catch (err: any) {
       console.error('Registration error:', err);
-      await supabase.auth.signOut();
       throw err;
     } finally {
       setIsLoading(false);
