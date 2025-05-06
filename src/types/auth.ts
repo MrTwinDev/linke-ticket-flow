@@ -47,12 +47,13 @@ export interface RegisterData {
   };
 }
 
+// Update the return types to match what Supabase functions return
 export interface AuthContextType {
   currentUser: User | null;
   profileType: ProfileType | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string, profile: ProfileType) => Promise<void>;
+  login: (email: string, password: string, profile: ProfileType) => Promise<any>;
   logout: () => Promise<void>;
-  register: (data: RegisterData) => Promise<void>;
+  register: (data: RegisterData) => Promise<any>;
 }
