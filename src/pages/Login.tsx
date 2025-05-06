@@ -1,5 +1,5 @@
 // src/pages/Login.tsx
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,125 +7,126 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/Header";
 import { useAuth, ProfileType } from "@/contexts/AuthContext";
-import { useLoginForm } from "@/hooks/useLoginForm";
+import { useToast } from "@/hooks/use-toast";
 
 const Login: React.FC = () => {
-  // Lógica de formulário (estado, handlers) isolada no hook
-  const {
-    email,
-    setEmail,
-    password,
-    setPassword,
-    profileType,
-    setProfileType,
-    isLoading,
-    error: errorMessage,
-    handleSubmit
-  } = useLoginForm();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [profileType, setProfileType] = useState<ProfileType>("importer");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Contexto de autenticação
-  const { isAuthenticated, isLoading: authLoading } = useAuth();
+  const { login, isAuthenticated, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
-  // Se já estiver logado, redireciona ao dashboard
+  // Redireciona se já autenticado
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
       navigate("/dashboard");
     }
   }, [authLoading, isAuthenticated, navigate]);
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setIsLoading(true);
+
+    try {
+      await login(email, password, profileType);
+      toast({
+        title: "Login bem-sucedido",
+        description: `Bem-vindo de volta, ${
+          profileType === "importer" ? "importador" : "despachante"
+        }.`,
+      });
+      navigate("/dashboard");
+    } catch (err: any) {
+      const msg = err.message || "Erro ao fazer login.";
+      setError(msg);
+      toast({ variant: "destructive", title: "Falha no login", description: msg });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
 
-      <div className="flex-grow flex items-center justify-center bg-gray-50 py-12 px-4">
+      <div className="flex-grow flex items-center justify-center bg-gray-50 p-8">
         <div className="max-w-md w-full bg-white p-8 rounded-lg shadow space-y-6">
-
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-900">Bem-vindo de volta</h2>
-            <p className="mt-2 text-sm text-gray-600">
-              Por favor, insira suas credenciais para acessar sua conta
+            <h2 className="text-3xl font-bold">Bem-vindo de volta</h2>
+            <p className="text-sm text-gray-600">
+              Insira suas credenciais para acessar sua conta.
             </p>
           </div>
 
-          {errorMessage && (
-            <div className="p-3 bg-red-100 text-red-800 rounded">
-              {errorMessage}
-            </div>
+          {error && (
+            <div className="p-3 bg-red-100 text-red-800 rounded">{error}</div>
           )}
 
           <Tabs
             value={profileType}
-            onValueChange={(val) => setProfileType(val as ProfileType)}
+            onValueChange={(v) => setProfileType(v as ProfileType)}
             className="w-full"
           >
-            <TabsList className="grid grid-cols-2 mb-6">
+            <TabsList className="grid grid-cols-2 mb-4">
               <TabsTrigger value="importer">Importador</TabsTrigger>
-              <TabsTrigger value="broker">Despachante Aduaneiro</TabsTrigger>
+              <TabsTrigger value="broker">Despachante</TabsTrigger>
             </TabsList>
 
-            {/* Formulário Importador */}
             <TabsContent value="importer">
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <Label htmlFor="email-importer">Endereço de e-mail</Label>
+                  <Label>E-mail</Label>
                   <Input
-                    id="email-importer"
                     type="email"
-                    required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="voce@empresa.com"
+                    required
                     disabled={isLoading}
                   />
                 </div>
-
                 <div>
-                  <Label htmlFor="pass-importer">Senha</Label>
+                  <Label>Senha</Label>
                   <Input
-                    id="pass-importer"
                     type="password"
-                    required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    required
                     disabled={isLoading}
                   />
                 </div>
-
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? "Entrando..." : "Entrar como Importador"}
                 </Button>
               </form>
             </TabsContent>
 
-            {/* Formulário Despachante */}
             <TabsContent value="broker">
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <Label htmlFor="email-broker">Endereço de e-mail</Label>
+                  <Label>E-mail</Label>
                   <Input
-                    id="email-broker"
                     type="email"
-                    required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="voce@despachante.com"
+                    required
                     disabled={isLoading}
                   />
                 </div>
-
                 <div>
-                  <Label htmlFor="pass-broker">Senha</Label>
+                  <Label>Senha</Label>
                   <Input
-                    id="pass-broker"
                     type="password"
-                    required
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    required
                     disabled={isLoading}
                   />
                 </div>
-
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? "Entrando..." : "Entrar como Despachante"}
                 </Button>
@@ -139,14 +140,6 @@ const Login: React.FC = () => {
               Registre-se agora
             </Link>
           </p>
-
-          <p className="text-center text-sm text-gray-500">
-            Contas de Demonstração:<br />
-            Importador: importer@example.com<br />
-            Despachante: broker@example.com<br />
-            Senha para ambos: password
-          </p>
-
         </div>
       </div>
     </div>
