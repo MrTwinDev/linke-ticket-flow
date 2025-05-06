@@ -1,5 +1,5 @@
 // src/pages/Login.tsx
-import React, { useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -10,17 +10,16 @@ import { useAuth, ProfileType } from "@/contexts/AuthContext";
 import Header from "@/components/Header";
 
 const Login: React.FC = () => {
-  const [email, setEmail] = React.useState("");
-  const [password, setPassword] = React.useState("");
-  const [profileType, setProfileType] = React.useState<ProfileType>("importer");
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [errorMessage, setErrorMessage] = React.useState<string | null>(null);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [profileType, setProfileType] = useState<ProfileType>("importer");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const { login, isAuthenticated, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // if already logged in, redirect to dashboard
+  // Redirect if already logged in
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
       navigate("/dashboard");
@@ -30,7 +29,6 @@ const Login: React.FC = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
-    setIsLoading(true);
 
     try {
       await login(email, password, profileType);
@@ -52,8 +50,6 @@ const Login: React.FC = () => {
         title: "Falha no login",
         description: msg,
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -64,9 +60,7 @@ const Login: React.FC = () => {
       <div className="flex-grow flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md">
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-gray-900">
-              Bem-vindo de volta
-            </h2>
+            <h2 className="text-3xl font-bold text-gray-900">Bem-vindo de volta</h2>
             <p className="mt-2 text-sm text-gray-600">
               Por favor, insira suas credenciais para acessar sua conta
             </p>
@@ -79,17 +73,15 @@ const Login: React.FC = () => {
           )}
 
           <Tabs
-            defaultValue="importer"
-            className="w-full"
             value={profileType}
             onValueChange={(val) => setProfileType(val as ProfileType)}
+            className="w-full"
           >
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="importer">Importador</TabsTrigger>
               <TabsTrigger value="broker">Despachante Aduaneiro</TabsTrigger>
             </TabsList>
 
-            {/* Formulário de Importador */}
             <TabsContent value="importer">
               <form className="space-y-6" onSubmit={handleLogin}>
                 <div className="space-y-4">
@@ -98,13 +90,11 @@ const Login: React.FC = () => {
                     <Input
                       id="importer-email"
                       type="email"
-                      autoComplete="email"
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="mt-1"
                       placeholder="voce@empresa.com"
-                      disabled={isLoading}
+                      disabled={authLoading}
                     />
                   </div>
                   <div>
@@ -120,26 +110,19 @@ const Login: React.FC = () => {
                     <Input
                       id="importer-password"
                       type="password"
-                      autoComplete="current-password"
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="mt-1"
-                      disabled={isLoading}
+                      disabled={authLoading}
                     />
                   </div>
                 </div>
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Entrando..." : "Entrar como Importador"}
+                <Button type="submit" className="w-full" disabled={authLoading}>
+                  {authLoading ? "Entrando..." : "Entrar como Importador"}
                 </Button>
               </form>
             </TabsContent>
 
-            {/* Formulário de Despachante */}
             <TabsContent value="broker">
               <form className="space-y-6" onSubmit={handleLogin}>
                 <div className="space-y-4">
@@ -148,13 +131,11 @@ const Login: React.FC = () => {
                     <Input
                       id="broker-email"
                       type="email"
-                      autoComplete="email"
                       required
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="mt-1"
                       placeholder="voce@despachante.com"
-                      disabled={isLoading}
+                      disabled={authLoading}
                     />
                   </div>
                   <div>
@@ -170,21 +151,15 @@ const Login: React.FC = () => {
                     <Input
                       id="broker-password"
                       type="password"
-                      autoComplete="current-password"
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="mt-1"
-                      disabled={isLoading}
+                      disabled={authLoading}
                     />
                   </div>
                 </div>
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={isLoading}
-                >
-                  {isLoading ? "Entrando..." : "Entrar como Despachante"}
+                <Button type="submit" className="w-full" disabled={authLoading}>
+                  {authLoading ? "Entrando..." : "Entrar como Despachante"}
                 </Button>
               </form>
             </TabsContent>
@@ -204,12 +179,9 @@ const Login: React.FC = () => {
 
           <div className="text-center mt-4 text-sm text-gray-500">
             <p>
-              Contas de Demonstração:
-              <br />
-              Importador: importer@example.com
-              <br />
-              Despachante: broker@example.com
-              <br />
+              Contas de Demonstração:<br />
+              Importador: importer@example.com<br />
+              Despachante: broker@example.com<br />
               Senha para ambos: password
             </p>
           </div>
