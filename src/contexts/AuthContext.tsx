@@ -1,4 +1,3 @@
-
 // src/contexts/AuthContext.tsx
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
@@ -270,4 +269,4 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 };
 
 // Re-export types for convenience
-export type { User as AuthUser, RegisterData };
+export type { User as AuthUser };
