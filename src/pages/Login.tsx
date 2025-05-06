@@ -1,4 +1,3 @@
-
 // src/pages/Login.tsx
 import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -6,31 +5,31 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useAuth, ProfileType } from "@/contexts/AuthContext";
 import Header from "@/components/Header";
+import { useAuth, ProfileType } from "@/contexts/AuthContext";
 import { useLoginForm } from "@/hooks/useLoginForm";
 
 const Login: React.FC = () => {
-  const { 
-    email, 
-    setEmail, 
-    password, 
-    setPassword, 
-    profileType, 
-    setProfileType, 
-    isLoading, 
-    error, 
-    handleSubmit 
+  const {
+    email,
+    setEmail,
+    password,
+    setPassword,
+    profileType,
+    setProfileType,
+    isLoading,
+    error,
+    handleSubmit
   } = useLoginForm();
-  
+
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
-  
-  // Redirect if already authenticated
+
+  // Redireciona após autenticação
   useEffect(() => {
-    console.log("Login page - auth state:", { isAuthenticated, authLoading });
+    console.log("Login.tsx • auth state:", { isAuthenticated, authLoading });
     if (!authLoading && isAuthenticated) {
-      console.log("User is authenticated, redirecting to dashboard");
+      console.log("Usuário autenticado → /dashboard");
       navigate("/dashboard");
     }
   }, [authLoading, isAuthenticated, navigate]);
@@ -49,7 +48,9 @@ const Login: React.FC = () => {
           </div>
 
           {error && (
-            <div className="p-3 bg-red-100 text-red-800 rounded">{error}</div>
+            <div className="p-3 bg-red-100 text-red-800 rounded">
+              {error}
+            </div>
           )}
 
           <Tabs
@@ -62,11 +63,13 @@ const Login: React.FC = () => {
               <TabsTrigger value="broker">Despachante</TabsTrigger>
             </TabsList>
 
+            {/** Formulário Importador */}
             <TabsContent value="importer">
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <Label>E-mail</Label>
+                  <Label htmlFor="email-importer">E-mail</Label>
                   <Input
+                    id="email-importer"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -75,8 +78,9 @@ const Login: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <Label>Senha</Label>
+                  <Label htmlFor="pass-importer">Senha</Label>
                   <Input
+                    id="pass-importer"
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -90,11 +94,13 @@ const Login: React.FC = () => {
               </form>
             </TabsContent>
 
+            {/** Formulário Despachante */}
             <TabsContent value="broker">
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
-                  <Label>E-mail</Label>
+                  <Label htmlFor="email-broker">E-mail</Label>
                   <Input
+                    id="email-broker"
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -103,8 +109,9 @@ const Login: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <Label>Senha</Label>
+                  <Label htmlFor="pass-broker">Senha</Label>
                   <Input
+                    id="pass-broker"
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
