@@ -14,6 +14,8 @@ const Login: React.FC = () => {
   const [password, setPassword] = useState("");
   const [profileType, setProfileType] = useState<ProfileType>("importer");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  // local loading state
+  const [isLoading, setIsLoading] = useState(false);
 
   const { login, isAuthenticated, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
@@ -29,6 +31,7 @@ const Login: React.FC = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
+    setIsLoading(true);
 
     try {
       await login(email, password, profileType);
@@ -50,6 +53,8 @@ const Login: React.FC = () => {
         title: "Falha no login",
         description: msg,
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -118,7 +123,7 @@ const Login: React.FC = () => {
                   </div>
                 </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {authLoading ? "Entrando..." : "Entrar como Importador"}
+                  {isLoading ? "Entrando..." : "Entrar como Importador"}
                 </Button>
               </form>
             </TabsContent>
@@ -159,7 +164,7 @@ const Login: React.FC = () => {
                   </div>
                 </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {authLoading ? "Entrando..." : "Entrar como Despachante"}
+                  {isLoading ? "Entrando..." : "Entrar como Despachante"}
                 </Button>
               </form>
             </TabsContent>
@@ -167,7 +172,7 @@ const Login: React.FC = () => {
 
           <div className="text-center mt-6">
             <p className="text-sm text-gray-600">
-              Não tem uma conta?{" "}
+              Não tem uma conta?{' '}
               <Link
                 to="/register"
                 className="text-linkeblue-600 hover:underline"
