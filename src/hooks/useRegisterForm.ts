@@ -1,19 +1,17 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth, ProfileType, PersonType } from "@/contexts/AuthContext";
 import { validateStep1, validateStep2, validateStep3 } from "@/utils/registerValidation";
-import { supabase } from "@/integrations/supabase/client";  // Fixed import path
+import { supabase } from "@/integrations/supabase/client";
 
 export const useRegisterForm = () => {
-  // Form steps
   const [step, setStep] = useState(1);
-  
+
   // Profile type state
   const [profileType, setProfileType] = useState<ProfileType>("importer");
   const [personType, setPersonType] = useState<PersonType>("PF");
-  
+
   // Person data
   const [fullName, setFullName] = useState("");
   const [companyName, setCompanyName] = useState("");
@@ -22,7 +20,7 @@ export const useRegisterForm = () => {
   const [documentNumber, setDocumentNumber] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  
+
   // Address data
   const [cep, setCep] = useState("");
   const [street, setStreet] = useState("");
@@ -31,11 +29,11 @@ export const useRegisterForm = () => {
   const [neighborhood, setNeighborhood] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("");
-  
+
   // Security data
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  
+
   // UI state
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
@@ -44,7 +42,6 @@ export const useRegisterForm = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Reset fields based on profile type and person type
   const resetFields = () => {
     if (personType === "PF") {
       setCompanyName("");
@@ -56,7 +53,6 @@ export const useRegisterForm = () => {
     setDocumentNumber("");
   };
 
-  // Form navigation
   const handleNextStep = () => {
     if (step === 1) {
       const validationErrors = validateStep1(
@@ -94,7 +90,6 @@ export const useRegisterForm = () => {
     }
   };
 
-  // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setApiError(null);
@@ -106,16 +101,15 @@ export const useRegisterForm = () => {
     setIsLoading(true);
 
     try {
-      // 1) Cria o usuário no Auth
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email,
         password,
       });
       if (signUpError) throw signUpError;
+
       const user = signUpData.user;
       if (!user) throw new Error("Usuário não retornado no cadastro.");
 
-      // 2) Atualiza o perfil que já existe (trigger no banco criou a linha)
       const updates: any = {
         profile_type: profileType,
         person_type: personType,
@@ -129,6 +123,7 @@ export const useRegisterForm = () => {
         city,
         state,
       };
+
       if (personType === "PF") {
         updates.full_name = fullName;
       } else {
@@ -144,15 +139,15 @@ export const useRegisterForm = () => {
 
       if (updateError) throw updateError;
 
-      // 3) Sucesso
       toast({
         title: "Registro bem-sucedido",
         description: "Sua conta foi criada com sucesso.",
       });
+
       navigate("/dashboard");
     } catch (error: any) {
       console.error(error);
-      // Taxa limite (rate limit) ou outros erros
+
       if (
         error.code === "over_email_send_rate_limit" ||
         (error.message?.includes("security purposes") &&
@@ -162,11 +157,11 @@ export const useRegisterForm = () => {
           "Por motivos de segurança, você só pode solicitar isto novamente após alguns segundos."
         );
       } else if (error.message?.includes("violates row-level security policy")) {
-        // Handling RLS policy violation
         setApiError("Erro de permissão: não foi possível atualizar o perfil.");
       } else {
         setApiError(error.message || "Ocorreu um erro durante o registro.");
       }
+
       toast({
         variant: "destructive",
         title: "Falha no registro",
@@ -180,11 +175,11 @@ export const useRegisterForm = () => {
   return {
     // Form state
     step,
-    
+
     // Profile type state
     profileType, setProfileType,
     personType, setPersonType,
-    
+
     // Person data
     fullName, setFullName,
     companyName, setCompanyName,
@@ -193,7 +188,7 @@ export const useRegisterForm = () => {
     documentNumber, setDocumentNumber,
     email, setEmail,
     phone, setPhone,
-    
+
     // Address data
     cep, setCep,
     street, setStreet,
@@ -202,16 +197,16 @@ export const useRegisterForm = () => {
     neighborhood, setNeighborhood,
     city, setCity,
     state, setState,
-    
+
     // Security data
     password, setPassword,
     confirmPassword, setConfirmPassword,
-    
+
     // UI state
     errors,
     isLoading,
     apiError,
-    
+
     // Functions
     handleNextStep,
     handlePrevStep,
@@ -219,3 +214,4 @@ export const useRegisterForm = () => {
     resetFields,
   };
 };
+

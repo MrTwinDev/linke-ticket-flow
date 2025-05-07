@@ -1,9 +1,9 @@
 
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { Home, Inbox, FileText, X } from "lucide-react";
+import { Home, Inbox, FileText, HelpCircle, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 
 interface SidebarProps {
   isSidebarOpen: boolean;
@@ -82,6 +82,21 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }: SidebarProps) => {
                 Criar Ticket
               </NavLink>
             )}
+
+            <NavLink
+              to="/dashboard/support"
+              className={({ isActive }) =>
+                cn(
+                  "flex items-center rounded-md px-3 py-2 text-sm font-medium",
+                  isActive
+                    ? "bg-linkeblue-50 text-linkeblue-600"
+                    : "text-gray-700 hover:bg-gray-100"
+                )
+              }
+            >
+              <HelpCircle size={18} className="mr-2" />
+              Suporte
+            </NavLink>
           </nav>
         </div>
       </div>
