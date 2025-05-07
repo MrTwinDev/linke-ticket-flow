@@ -127,78 +127,111 @@ export const useAuthOperations = ({
   const register = async (data: RegisterData) => {
     setIsLoading(true);
     try {
-      // Get the API key directly from the supabase client
-      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhaW5sb3Nicmlzb3ZhdHh2eHh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY0NjkzMzQsImV4cCI6MjA2MjA0NTMzNH0.IUmUKVIU4mjE7iuwbm-V-pGbUDjP2dj_jAl9fzILJXs';
+      console.log("🟢 Starting registration for:", data.email);
       
-      // Fix the fetch request with proper headers
-      const response = await fetch('https://qainlosbrisovatxvxxx.supabase.co/functions/v1/autoconfirm-signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': supabaseKey,
-          'Authorization': `Bearer ${supabaseKey}`,
-        },
-        body: JSON.stringify({
-          email: data.email,
-          password: data.password,
-          profileType: data.profileType,
-          personType: data.personType,
-          phone: data.phone,
-          documentNumber: data.documentNumber,
-          address: data.address,
-          fullName: data.fullName,
-          companyName: data.companyName,
-          responsibleName: data.responsibleName,
-          responsibleCpf: data.responsibleCpf
-        })
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Erro no registro.');
-      }
-
-      const result = await response.json();
-
-      const { data: signInData, error: signInErr } = await supabase.auth.signInWithPassword({
+      // Directly use the Supabase client for signup
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
       });
-
-      if (signInErr) {
-        console.error('Erro no login automático:', signInErr);
-        throw new Error(`Cadastro realizado, mas o login falhou: ${signInErr.message}`);
+      
+      if (signUpError) {
+        console.error("🔴 Signup error:", signUpError);
+        throw signUpError;
       }
-
-      if (signInData.user) {
-        setIsAuthenticated(true);
-        setCurrentUser({
-          id: signInData.user.id,
-          email: signInData.user.email || '',
-          profileType: data.profileType,
-          personType: data.personType,
-          phone: data.phone,
-          documentNumber: data.documentNumber,
-          address: data.address,
-          ...(data.personType === 'PF'
-            ? { fullName: data.fullName }
-            : {
-                companyName: data.companyName,
-                responsibleName: data.responsibleName,
-                responsibleCpf: data.responsibleCpf,
-              }),
+      
+      if (!signUpData.user) {
+        throw new Error("No user returned from signup");
+      }
+      
+      console.log("✅ User signed up successfully:", signUpData.user.id);
+      
+      // Create profile entry
+      const profileData = {
+        id: signUpData.user.id,
+        profile_type: data.profileType,
+        person_type: data.personType,
+        phone: data.phone,
+        document_number: data.documentNumber,
+        cep: data.address.cep,
+        street: data.address.street,
+        number: data.address.number,
+        complement: data.address.complement || null,
+        neighborhood: data.address.neighborhood,
+        city: data.address.city,
+        state: data.address.state,
+      };
+      
+      // Add person-specific fields
+      if (data.personType === 'PF') {
+        Object.assign(profileData, {
+          full_name: data.fullName,
         });
-        setProfileType(data.profileType);
+      } else {
+        Object.assign(profileData, {
+          company_name: data.companyName,
+          responsible_name: data.responsibleName,
+          responsible_cpf: data.responsibleCpf,
+        });
       }
-
-      toast({
-        title: "Registro bem-sucedido",
-        description: "Sua conta foi criada com sucesso e você foi autenticado.",
-      });
-
-      return signInData;
+      
+      console.log("🟢 Creating profile for user:", profileData);
+      
+      // Update or create the profile
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .upsert(profileData);
+        
+      if (profileError) {
+        console.error("🔴 Profile creation error:", profileError);
+        throw new Error(`Failed to create user profile: ${profileError.message}`);
+      }
+      
+      console.log("✅ Profile created successfully");
+      
+      // Auto login after signup
+      if (data.autoLogin !== false) {
+        console.log("🟢 Attempting auto-login after registration");
+        try {
+          const loginResult = await login(data.email, data.password);
+          console.log("✅ Auto-login successful after registration");
+          return loginResult;
+        } catch (loginErr) {
+          console.error("🟠 Auto-login failed after registration:", loginErr);
+          // Don't throw here, registration was still successful
+          toast({
+            title: "Registro concluído",
+            description: "Conta criada com sucesso, mas o login automático falhou. Por favor, faça login manualmente.",
+            variant: "default"
+          });
+        }
+      } else {
+        console.log("ℹ️ Auto-login skipped as requested");
+        toast({
+          title: "Registro bem-sucedido",
+          description: "Sua conta foi criada com sucesso. Verifique seu email para confirmar o cadastro.",
+        });
+      }
+      
+      return signUpData;
     } catch (err: any) {
-      console.error('Registration error:', err);
+      console.error('🔴 Registration error:', err);
+      
+      // Provide more specific error messages
+      let errorMessage = err.message || "Ocorreu um erro durante o registro.";
+      
+      if (err.message === "Failed to fetch") {
+        errorMessage = "Erro de conexão com o servidor. Verifique sua conexão à internet e tente novamente.";
+      } else if (err.message?.includes("unique constraint")) {
+        errorMessage = "Este email já está cadastrado. Por favor, utilize outro email ou faça login.";
+      }
+      
+      toast({
+        variant: "destructive",
+        title: "Falha no registro",
+        description: errorMessage,
+      });
+      
       throw err;
     } finally {
       setIsLoading(false);

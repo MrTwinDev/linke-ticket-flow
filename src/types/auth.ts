@@ -45,6 +45,7 @@ export interface RegisterData {
     city: string;
     state: string;
   };
+  autoLogin?: boolean;
 }
 
 // Update the return types to match what Supabase functions return

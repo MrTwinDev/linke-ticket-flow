@@ -1,9 +1,9 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth, ProfileType, PersonType } from "@/contexts/AuthContext";
 import { validateStep1, validateStep2, validateStep3 } from "@/utils/registerValidation";
-import { supabase } from "@/integrations/supabase/client";
 
 export const useRegisterForm = () => {
   const [step, setStep] = useState(1);
@@ -39,6 +39,7 @@ export const useRegisterForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
 
+  const { register } = useAuth();
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -101,44 +102,35 @@ export const useRegisterForm = () => {
     setIsLoading(true);
 
     try {
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+      console.log("📝 Starting registration process...");
+      
+      await register({
         email,
         password,
-      });
-      if (signUpError) throw signUpError;
-
-      const user = signUpData.user;
-      if (!user) throw new Error("Usuário não retornado no cadastro.");
-
-      const updates: any = {
-        profile_type: profileType,
-        person_type: personType,
+        profileType,
+        personType,
         phone,
-        document_number: documentNumber,
-        cep,
-        street,
-        number,
-        complement,
-        neighborhood,
-        city,
-        state,
-      };
+        documentNumber,
+        address: {
+          cep,
+          street,
+          number,
+          complement,
+          neighborhood,
+          city,
+          state,
+        },
+        ...(personType === "PF"
+          ? { fullName }
+          : {
+              companyName,
+              responsibleName,
+              responsibleCpf,
+            }),
+      });
 
-      if (personType === "PF") {
-        updates.full_name = fullName;
-      } else {
-        updates.company_name = companyName;
-        updates.responsible_name = responsibleName;
-        updates.responsible_cpf = responsibleCpf;
-      }
-
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update(updates)
-        .eq("id", user.id);
-
-      if (updateError) throw updateError;
-
+      console.log("✅ Registration successful, redirecting to dashboard");
+      
       toast({
         title: "Registro bem-sucedido",
         description: "Sua conta foi criada com sucesso.",
@@ -146,27 +138,14 @@ export const useRegisterForm = () => {
 
       navigate("/dashboard");
     } catch (error: any) {
-      console.error(error);
-
-      if (
-        error.code === "over_email_send_rate_limit" ||
-        (error.message?.includes("security purposes") &&
-          error.message.includes("after"))
-      ) {
-        setApiError(
-          "Por motivos de segurança, você só pode solicitar isto novamente após alguns segundos."
-        );
-      } else if (error.message?.includes("violates row-level security policy")) {
-        setApiError("Erro de permissão: não foi possível atualizar o perfil.");
+      console.error("🔴 Registration error:", error);
+      
+      // Set specific error messages
+      if (error.message === "Failed to fetch") {
+        setApiError("Erro de conexão com o servidor. Verifique sua conexão à internet e tente novamente.");
       } else {
         setApiError(error.message || "Ocorreu um erro durante o registro.");
       }
-
-      toast({
-        variant: "destructive",
-        title: "Falha no registro",
-        description: error.message || "Ocorreu um erro durante o registro.",
-      });
     } finally {
       setIsLoading(false);
     }
@@ -214,4 +193,3 @@ export const useRegisterForm = () => {
     resetFields,
   };
 };
-
