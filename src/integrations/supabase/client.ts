@@ -20,53 +20,9 @@ export const supabase = createClient<Database>(
       persistSession: true,
       autoRefreshToken: true,
       storageKey: 'supabase-auth-token',
-      storage: localStorage,
-      detectSessionInUrl: true, // This enables OAuth redirects
     },
   }
 );
 
 // Debug supabase client initialization
 console.log('[supabase] Client initialized successfully');
-
-// Function to clean up any stale auth state
-export const cleanupAuthState = () => {
-  console.log("[supabase] Cleaning up auth state");
-  
-  // Remove standard auth tokens
-  localStorage.removeItem('supabase.auth.token');
-  
-  // Remove all Supabase auth keys from localStorage
-  Object.keys(localStorage).forEach((key) => {
-    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-      console.log(`[supabase] Removing key: ${key}`);
-      localStorage.removeItem(key);
-    }
-  });
-};
-
-// Add a helper function to diagnose auth issues
-export const logAuthDiagnostics = () => {
-  console.log("🔍 Auth Diagnostics Report");
-  console.log("---------------------------");
-
-  // Check current session
-  supabase.auth.getSession().then(({ data: { session } }) => {
-    console.log("Current session:", session ? "Active" : "None");
-    if (session) {
-      console.log("Session expires at:", new Date(session.expires_at! * 1000).toLocaleString());
-      console.log("User ID:", session.user.id);
-      console.log("User email:", session.user.email);
-    }
-  });
-
-  // Check localStorage items
-  console.log("\nLocal Storage Auth Items:");
-  Object.keys(localStorage).forEach((key) => {
-    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-      console.log(`- ${key}: [${typeof localStorage.getItem(key)}]`);
-    }
-  });
-
-  console.log("---------------------------");
-};
