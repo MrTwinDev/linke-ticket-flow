@@ -5,11 +5,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/Header";
 import { useAuth } from "@/hooks/useAuth";
 import { useLoginForm } from "@/hooks/useLoginForm";
-import { ProfileType } from "@/types/auth"; // Make sure we import ProfileType
 
 const Login: React.FC = () => {
   const {
@@ -17,8 +15,6 @@ const Login: React.FC = () => {
     setEmail,
     password,
     setPassword,
-    profileType,
-    setProfileType,
     isLoading,
     error,
     handleSubmit
@@ -55,78 +51,33 @@ const Login: React.FC = () => {
             </div>
           )}
 
-          <Tabs
-            value={profileType}
-            onValueChange={(v: ProfileType) => setProfileType(v)} // Fix: explicitly type v as ProfileType
-            className="w-full"
-          >
-            <TabsList className="grid grid-cols-2 mb-4">
-              <TabsTrigger value="importer">Importador</TabsTrigger>
-              <TabsTrigger value="broker">Despachante</TabsTrigger>
-            </TabsList>
-
-            {/** Formulário Importador */}
-            <TabsContent value="importer">
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <Label htmlFor="email-importer">E-mail</Label>
-                  <Input
-                    id="email-importer"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    disabled={isLoading}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="pass-importer">Senha</Label>
-                  <Input
-                    id="pass-importer"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    disabled={isLoading}
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Entrando..." : "Entrar como Importador"}
-                </Button>
-              </form>
-            </TabsContent>
-
-            {/** Formulário Despachante */}
-            <TabsContent value="broker">
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <Label htmlFor="email-broker">E-mail</Label>
-                  <Input
-                    id="email-broker"
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    required
-                    disabled={isLoading}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="pass-broker">Senha</Label>
-                  <Input
-                    id="pass-broker"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    disabled={isLoading}
-                  />
-                </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Entrando..." : "Entrar como Despachante"}
-                </Button>
-              </form>
-            </TabsContent>
-          </Tabs>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <Label htmlFor="email">E-mail</Label>
+              <Input
+                id="email"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                disabled={isLoading}
+              />
+            </div>
+            <div>
+              <Label htmlFor="password">Senha</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                disabled={isLoading}
+              />
+            </div>
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? "Entrando..." : "Entrar"}
+            </Button>
+          </form>
 
           <p className="text-center text-sm text-gray-600">
             Não tem conta?{" "}
