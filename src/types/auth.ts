@@ -47,7 +47,6 @@ export interface RegisterData {
   };
 }
 
-// Update the return types to match what Supabase functions return
 export interface AuthContextType {
   currentUser: User | null;
   profileType: ProfileType | null;

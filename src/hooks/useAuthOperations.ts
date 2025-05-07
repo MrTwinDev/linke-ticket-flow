@@ -25,9 +25,9 @@ export const useAuthOperations = ({
   
   const login = async (email: string, password: string, profileType: ProfileType) => {
     setIsLoading(true);
+    console.log(`🟢 Attempting login as ${profileType} for ${email}`);
+    
     try {
-      console.log(`🟢 Attempting login as ${profileType} for ${email}`);
-      
       // Using signInWithPassword with option object format for better error handling
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -83,6 +83,8 @@ export const useAuthOperations = ({
           });
           setProfileType(profileData.profile_type as ProfileType);
           setIsAuthenticated(true);
+          
+          console.log("✅ User session established with profile type:", profileData.profile_type);
         }
       }
       
@@ -98,10 +100,12 @@ export const useAuthOperations = ({
   const logout = async () => {
     setIsLoading(true);
     try {
+      console.log("🟢 Attempting logout");
       await supabase.auth.signOut();
       setCurrentUser(null);
       setProfileType(null);
       setIsAuthenticated(false);
+      console.log("✅ Logout successful");
     } catch (err) {
       console.error("🔴 Logout error:", err);
       throw err;
@@ -113,10 +117,12 @@ export const useAuthOperations = ({
   const register = async (data: RegisterData) => {
     setIsLoading(true);
     try {
+      console.log("🟢 Attempting registration for:", data.email);
+      
       // Get the API key directly from the supabase client
       const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhaW5sb3Nicmlzb3ZhdHh2eHh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTUxNTQyNDMsImV4cCI6MjAyMDczMDg0M30.8Vvj3Aelw5vEjD4OcqPP92Vp6Lhd3RB-Dz0qpwR5O8A';
       
-      // Fix the fetch request with proper headers
+      // Call the edge function to handle registration
       const response = await fetch('https://qainlosbrisovatxvxxx.supabase.co/functions/v1/autoconfirm-signup', {
         method: 'POST',
         headers: {
@@ -140,22 +146,28 @@ export const useAuthOperations = ({
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Erro no registro.');
+        const errorData = await response.json();
+        console.error("🔴 Registration error from edge function:", errorData);
+        throw new Error(errorData.message || 'Erro no registro.');
       }
 
       const result = await response.json();
+      console.log("✅ Registration successful:", result);
 
+      // Automatically log in the user after successful registration
+      console.log("🟢 Attempting auto-login after registration");
       const { data: signInData, error: signInErr } = await supabase.auth.signInWithPassword({
         email: data.email,
         password: data.password,
       });
 
       if (signInErr) {
-        console.error('Erro no login automático:', signInErr);
+        console.error('🔴 Auto-login error:', signInErr);
         throw new Error(`Cadastro realizado, mas o login falhou: ${signInErr.message}`);
       }
 
+      console.log("✅ Auto-login successful:", !!signInData.user);
+      
       if (signInData.user) {
         setIsAuthenticated(true);
         setCurrentUser({
@@ -175,6 +187,8 @@ export const useAuthOperations = ({
               }),
         });
         setProfileType(data.profileType);
+        
+        console.log("✅ User session established after registration");
       }
 
       toast({
@@ -184,7 +198,7 @@ export const useAuthOperations = ({
 
       return signInData;
     } catch (err: any) {
-      console.error('Registration error:', err);
+      console.error('🔴 Registration error:', err);
       throw err;
     } finally {
       setIsLoading(false);

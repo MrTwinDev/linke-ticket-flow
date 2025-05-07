@@ -1,12 +1,14 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { useAuth, ProfileType, PersonType } from "@/contexts/AuthContext";
+import { ProfileType, PersonType } from "@/types/auth";
+import { useAuth } from "@/hooks/useAuth";
 import { validateStep1, validateStep2, validateStep3 } from "@/utils/registerValidation";
-import { supabase } from "@/integrations/supabase/client";
 
 export const useRegisterForm = () => {
   const [step, setStep] = useState(1);
+  const { register } = useAuth();
 
   // Profile type state
   const [profileType, setProfileType] = useState<ProfileType>("importer");
@@ -93,79 +95,71 @@ export const useRegisterForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setApiError(null);
+    console.log("🟢 Registration submission initiated");
 
+    // Validate password
     const validationErrors = validateStep3(password, confirmPassword);
     setErrors(validationErrors);
-    if (Object.keys(validationErrors).length > 0) return;
+    if (Object.keys(validationErrors).length > 0) {
+      console.log("🔴 Password validation failed", validationErrors);
+      return;
+    }
 
     setIsLoading(true);
 
     try {
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+      // Prepare registration data
+      const registerData = {
         email,
         password,
-      });
-      if (signUpError) throw signUpError;
-
-      const user = signUpData.user;
-      if (!user) throw new Error("Usuário não retornado no cadastro.");
-
-      const updates: any = {
-        profile_type: profileType,
-        person_type: personType,
+        profileType,
+        personType,
         phone,
-        document_number: documentNumber,
-        cep,
-        street,
-        number,
-        complement,
-        neighborhood,
-        city,
-        state,
+        documentNumber,
+        address: {
+          cep,
+          street,
+          number,
+          complement,
+          neighborhood,
+          city,
+          state,
+        },
+        ...(personType === "PF" 
+          ? { fullName } 
+          : { companyName, responsibleName, responsibleCpf })
       };
 
-      if (personType === "PF") {
-        updates.full_name = fullName;
-      } else {
-        updates.company_name = companyName;
-        updates.responsible_name = responsibleName;
-        updates.responsible_cpf = responsibleCpf;
-      }
-
-      const { error: updateError } = await supabase
-        .from("profiles")
-        .update(updates)
-        .eq("id", user.id);
-
-      if (updateError) throw updateError;
-
+      console.log("🟢 Submitting registration data");
+      await register(registerData);
+      
+      // If registration succeeds, navigate to dashboard
+      console.log("🚀 Registration successful, redirecting to /dashboard");
       toast({
         title: "Registro bem-sucedido",
-        description: "Sua conta foi criada com sucesso.",
+        description: "Sua conta foi criada com sucesso e você foi autenticado.",
       });
-
       navigate("/dashboard");
     } catch (error: any) {
-      console.error(error);
-
-      if (
-        error.code === "over_email_send_rate_limit" ||
-        (error.message?.includes("security purposes") &&
-          error.message.includes("after"))
-      ) {
-        setApiError(
-          "Por motivos de segurança, você só pode solicitar isto novamente após alguns segundos."
-        );
-      } else if (error.message?.includes("violates row-level security policy")) {
-        setApiError("Erro de permissão: não foi possível atualizar o perfil.");
-      } else {
-        setApiError(error.message || "Ocorreu um erro durante o registro.");
+      console.error("🔴 Registration error:", error);
+      
+      // Format the error message for display
+      let errorMessage = "Ocorreu um erro durante o registro.";
+      
+      if (error.message?.includes("security purposes") && error.message.includes("after")) {
+        errorMessage = "Por motivos de segurança, você só pode solicitar isto novamente após alguns segundos.";
+      } else if (error.message?.includes("Failed to fetch")) {
+        errorMessage = "Erro de conexão com o servidor. Verifique sua conexão e tente novamente.";
+      } else if (error.message) {
+        errorMessage = error.message;
       }
-
+      
+      setApiError(errorMessage);
+      
       toast({
         variant: "destructive",
         title: "Falha no registro",
-        description: error.message || "Ocorreu um erro durante o registro.",
+        description: errorMessage,
       });
     } finally {
       setIsLoading(false);
@@ -214,4 +208,3 @@ export const useRegisterForm = () => {
     resetFields,
   };
 };
-

@@ -1,7 +1,7 @@
 
 import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/Header";
 import ProfileTypeSelector from "@/components/register/ProfileTypeSelector";
 import ProgressIndicator from "@/components/register/ProgressIndicator";
@@ -40,17 +40,18 @@ const Register: React.FC = () => {
     resetFields,
   } = useRegisterForm();
 
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
   const stepNames = ["Informações do Perfil", "Endereço", "Segurança"];
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (isAuthenticated) {
-      console.log("Register: User is authenticated, redirecting to dashboard");
+    console.log("Register: Auth state:", { isAuthenticated, authLoading });
+    if (!authLoading && isAuthenticated) {
+      console.log("🚀 User already authenticated, redirecting to /dashboard");
       navigate("/dashboard");
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, authLoading, navigate]);
 
   // Reset fields when profile or person type changes
   useEffect(() => {

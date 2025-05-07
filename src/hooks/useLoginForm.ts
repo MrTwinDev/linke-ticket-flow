@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { ProfileType } from "@/types/auth";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
+import { cleanupAuthState } from "@/integrations/supabase/client";
 
 export const useLoginForm = () => {
   const [email, setEmail] = useState("");
@@ -22,22 +23,25 @@ export const useLoginForm = () => {
     setIsLoading(true);
 
     try {
-      console.log("🟢 Iniciando login com:", { email, profileType });
+      console.log("🟢 Login attempt:", { email, profileType });
+      
+      // Clean up any existing auth state to prevent conflicts
+      cleanupAuthState();
 
       // Try the login operation
       const result = await login(email, password, profileType);
       
-      console.log("✅ Login realizado com sucesso", result);
+      console.log("✅ Login successful", result);
 
       toast({
         title: "Login bem-sucedido",
         description: `Bem-vindo de volta, ${profileType === "importer" ? "importador" : "despachante"}.`,
       });
 
-      console.log("🚀 Redirecionando para /dashboard...");
+      console.log("🚀 Redirecting to /dashboard...");
       navigate("/dashboard");
     } catch (err: any) {
-      console.error("🔴 Erro durante login:", err);
+      console.error("🔴 Login error:", err);
       
       // Provide more specific error messages
       let errorMessage = "Falha na autenticação. Verifique suas credenciais.";

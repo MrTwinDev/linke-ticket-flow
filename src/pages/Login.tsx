@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Header from "@/components/Header";
 import { useAuth } from "@/hooks/useAuth";
 import { useLoginForm } from "@/hooks/useLoginForm";
-import { ProfileType } from "@/types/auth"; // Make sure we import ProfileType
+import { ProfileType } from "@/types/auth"; 
 
 const Login: React.FC = () => {
   const {
@@ -31,7 +31,7 @@ const Login: React.FC = () => {
   useEffect(() => {
     console.log("Login.tsx • auth state:", { isAuthenticated, authLoading });
     if (!authLoading && isAuthenticated) {
-      console.log("Usuário autenticado → /dashboard");
+      console.log("🚀 User authenticated → redirecting to /dashboard");
       navigate("/dashboard");
     }
   }, [authLoading, isAuthenticated, navigate]);
@@ -57,7 +57,7 @@ const Login: React.FC = () => {
 
           <Tabs
             value={profileType}
-            onValueChange={(v: ProfileType) => setProfileType(v)} // Fix: explicitly type v as ProfileType
+            onValueChange={(v: string) => setProfileType(v as ProfileType)}
             className="w-full"
           >
             <TabsList className="grid grid-cols-2 mb-4">
@@ -130,7 +130,7 @@ const Login: React.FC = () => {
 
           <p className="text-center text-sm text-gray-600">
             Não tem conta?{" "}
-            <Link to="/register" className="text-linkeblue-600 hover:underline">
+            <Link to="/register" className="text-blue-600 hover:underline">
               Registre-se agora
             </Link>
           </p>
