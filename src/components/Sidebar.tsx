@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { NavLink } from "react-router-dom";
-import { Home, Inbox, FileText, HelpCircle, BookOpen, X } from "lucide-react";
+import { Home, Inbox, FileText, HelpCircle, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -96,21 +96,6 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }: SidebarProps) => {
             >
               <HelpCircle size={18} className="mr-2" />
               Suporte
-            </NavLink>
-
-            <NavLink
-              to="/dashboard/faq"
-              className={({ isActive }) =>
-                cn(
-                  "flex items-center rounded-md px-3 py-2 text-sm font-medium",
-                  isActive
-                    ? "bg-linkeblue-50 text-linkeblue-600"
-                    : "text-gray-700 hover:bg-gray-100"
-                )
-              }
-            >
-              <BookOpen size={18} className="mr-2" />
-              FAQ
             </NavLink>
           </nav>
         </div>
