@@ -1,3 +1,4 @@
+
 // src/hooks/useAuthOperations.ts
 import { supabase } from "@/integrations/supabase/client";
 import { ProfileType, RegisterData, User } from "@/types/auth";
@@ -66,7 +67,7 @@ export function useAuthOperations({
           id: data.user.id,
           email: data.user.email || '',
           profileType: prof.profile_type as ProfileType,
-          personType: prof.person_type,
+          personType: prof.person_type as "PF" | "PJ", // Fix: explicitly cast to PersonType
           phone: prof.phone,
           documentNumber: prof.document_number,
           address: {
