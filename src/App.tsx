@@ -17,6 +17,9 @@ import ProfilePage from "./pages/ProfilePage";
 import Support from "./pages/Support";
 import NotFound from "./pages/NotFound";
 
+// Import storage initialization
+import "@/integrations/supabase/storage-init";
+
 const queryClient = new QueryClient();
 
 const App = () => (
