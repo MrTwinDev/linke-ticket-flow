@@ -22,7 +22,7 @@ export const useLoginForm = () => {
     try {
       console.log("🟢 Iniciando login com:", { email });
 
-      // Try the login operation without profile type
+      // Login with email and password only - no profile type required
       const result = await login(email, password);
       
       console.log("✅ Login realizado com sucesso", result);

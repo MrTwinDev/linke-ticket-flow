@@ -20,9 +20,26 @@ export const supabase = createClient<Database>(
       persistSession: true,
       autoRefreshToken: true,
       storageKey: 'supabase-auth-token',
+      storage: localStorage,
     },
   }
 );
 
 // Debug supabase client initialization
 console.log('[supabase] Client initialized successfully');
+
+// Function to clean up any stale auth state
+export const cleanupAuthState = () => {
+  console.log("[supabase] Cleaning up auth state");
+  
+  // Remove standard auth tokens
+  localStorage.removeItem('supabase.auth.token');
+  
+  // Remove all Supabase auth keys from localStorage
+  Object.keys(localStorage).forEach((key) => {
+    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      console.log(`[supabase] Removing key: ${key}`);
+      localStorage.removeItem(key);
+    }
+  });
+};

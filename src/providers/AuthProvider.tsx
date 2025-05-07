@@ -47,24 +47,37 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               .single();
             if (error) throw error;
 
+            console.log("Profile loaded during auth state change:", profile);
+
+            if (!profile) {
+              console.error("No profile found for user", session.user.id);
+              setCurrentUser(null);
+              setProfileType(null);
+              setIsAuthenticated(false);
+              setIsLoading(false);
+              return;
+            }
+
             // Build User object
             const user: User = {
               id: session.user.id,
               email: session.user.email || '',
               profileType: profile.profile_type as ProfileType,
               personType: profile.person_type as PersonType,
-              phone: profile.phone,
-              documentNumber: profile.document_number,
+              phone: profile.phone || '',
+              documentNumber: profile.document_number || '',
               address: {
-                cep: profile.cep,
-                street: profile.street,
-                number: profile.number,
+                cep: profile.cep || '',
+                street: profile.street || '',
+                number: profile.number || '',
                 complement: profile.complement || undefined,
-                neighborhood: profile.neighborhood,
-                city: profile.city,
-                state: profile.state,
+                neighborhood: profile.neighborhood || '',
+                city: profile.city || '',
+                state: profile.state || '',
               },
             };
+            
+            // Set person-type specific fields
             if (profile.person_type === 'PF') {
               user.fullName = profile.full_name || undefined;
             } else {
@@ -73,7 +86,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
               user.responsibleCpf = profile.responsible_cpf || undefined;
             }
 
-            console.log("User profile loaded", { profileType: profile.profile_type });
+            console.log("User profile loaded", { 
+              profileType: profile.profile_type, 
+              email: session.user.email
+            });
+            
             setCurrentUser(user);
             setProfileType(profile.profile_type as ProfileType);
             setIsAuthenticated(true);

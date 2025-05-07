@@ -55,34 +55,48 @@ export const useAuthOperations = ({
           throw new Error("Failed to fetch user profile");
         }
         
+        console.log("✅ Retrieved profile data:", profileData);
+        
         // Set user state based on profile
         if (profileData) {
-          setCurrentUser({
+          const userProfileType = profileData.profile_type as ProfileType;
+          
+          console.log("✅ Setting profile type:", userProfileType);
+          
+          const user: User = {
             id: data.user.id,
             email: data.user.email || '',
-            profileType: profileData.profile_type as ProfileType,
+            profileType: userProfileType,
             personType: profileData.person_type as PersonType,
-            phone: profileData.phone,
-            documentNumber: profileData.document_number,
+            phone: profileData.phone || '',
+            documentNumber: profileData.document_number || '',
             address: {
-              cep: profileData.cep,
-              street: profileData.street,
-              number: profileData.number,
+              cep: profileData.cep || '',
+              street: profileData.street || '',
+              number: profileData.number || '',
               complement: profileData.complement || undefined,
-              neighborhood: profileData.neighborhood,
-              city: profileData.city,
-              state: profileData.state,
+              neighborhood: profileData.neighborhood || '',
+              city: profileData.city || '',
+              state: profileData.state || '',
             },
-            ...(profileData.person_type === 'PF'
-              ? { fullName: profileData.full_name }
-              : {
-                  companyName: profileData.company_name,
-                  responsibleName: profileData.responsible_name,
-                  responsibleCpf: profileData.responsible_cpf,
-                }),
-          });
-          setProfileType(profileData.profile_type as ProfileType);
+          };
+
+          // Set additional fields based on person type
+          if (profileData.person_type === 'PF') {
+            user.fullName = profileData.full_name || undefined;
+          } else if (profileData.person_type === 'PJ') {
+            user.companyName = profileData.company_name || undefined;
+            user.responsibleName = profileData.responsible_name || undefined;
+            user.responsibleCpf = profileData.responsible_cpf || undefined;
+          }
+
+          console.log("✅ Built user object:", user);
+          
+          setCurrentUser(user);
+          setProfileType(userProfileType);
           setIsAuthenticated(true);
+          
+          console.log("✅ Auth state updated with profile type:", userProfileType);
         }
       }
       
