@@ -2,14 +2,17 @@
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { RegisterData, ProfileType, User, PersonType } from "@/types/auth";
-import { UseToastReturn } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
+
+// Define the toast type locally since it's not exported from use-toast
+type ToastFunction = ReturnType<typeof useToast>["toast"];
 
 interface UseAuthOperationsProps {
   setCurrentUser: (user: User | null) => void;
   setProfileType: (profileType: ProfileType | null) => void;
   setIsAuthenticated: (isAuthenticated: boolean) => void;
   setIsLoading: (isLoading: boolean) => void;
-  toast: UseToastReturn["toast"];
+  toast: ToastFunction;
 }
 
 export const useAuthOperations = ({
