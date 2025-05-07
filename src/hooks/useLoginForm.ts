@@ -1,12 +1,14 @@
 
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ProfileType } from "@/types/auth";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 
 export const useLoginForm = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [profileType, setProfileType] = useState<ProfileType>("importer");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
@@ -20,16 +22,16 @@ export const useLoginForm = () => {
     setIsLoading(true);
 
     try {
-      console.log("🟢 Iniciando login com:", { email });
+      console.log("🟢 Iniciando login com:", { email, profileType });
 
-      // Try the login operation without profile type
-      const result = await login(email, password);
+      // Try the login operation
+      const result = await login(email, password, profileType);
       
       console.log("✅ Login realizado com sucesso", result);
 
       toast({
         title: "Login bem-sucedido",
-        description: "Bem-vindo de volta.",
+        description: `Bem-vindo de volta, ${profileType === "importer" ? "importador" : "despachante"}.`,
       });
 
       console.log("🚀 Redirecionando para /dashboard...");
@@ -65,6 +67,8 @@ export const useLoginForm = () => {
     setEmail,
     password,
     setPassword,
+    profileType,
+    setProfileType,
     isLoading,
     error,
     handleSubmit

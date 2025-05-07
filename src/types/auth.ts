@@ -53,7 +53,7 @@ export interface AuthContextType {
   profileType: ProfileType | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<any>;
+  login: (email: string, password: string, profile: ProfileType) => Promise<any>;
   logout: () => Promise<void>;
   register: (data: RegisterData) => Promise<any>;
 }

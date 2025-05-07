@@ -23,10 +23,10 @@ export const useAuthOperations = ({
   toast
 }: UseAuthOperationsProps) => {
   
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string, profileType: ProfileType) => {
     setIsLoading(true);
     try {
-      console.log(`🟢 Attempting login for ${email}`);
+      console.log(`🟢 Attempting login as ${profileType} for ${email}`);
       
       // Using signInWithPassword with option object format for better error handling
       const { data, error } = await supabase.auth.signInWithPassword({
