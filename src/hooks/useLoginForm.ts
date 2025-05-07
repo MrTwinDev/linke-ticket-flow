@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ProfileType } from "@/types/auth";
@@ -23,9 +24,10 @@ export const useLoginForm = () => {
     try {
       console.log("🟢 Iniciando login com:", { email, profileType });
 
-      await login(email, password, profileType);
-
-      console.log("✅ Login realizado com sucesso");
+      // Try the login operation
+      const result = await login(email, password, profileType);
+      
+      console.log("✅ Login realizado com sucesso", result);
 
       toast({
         title: "Login bem-sucedido",
@@ -36,12 +38,24 @@ export const useLoginForm = () => {
       navigate("/dashboard");
     } catch (err: any) {
       console.error("🔴 Erro durante login:", err);
-      const msg = err.message || "Falha na autenticação. Verifique suas credenciais.";
-      setError(msg);
+      
+      // Provide more specific error messages
+      let errorMessage = "Falha na autenticação. Verifique suas credenciais.";
+      
+      if (err.message === "Failed to fetch" || err.message?.includes("fetch")) {
+        errorMessage = "Erro de conexão com o servidor. Tente novamente mais tarde.";
+      } else if (err.message?.includes("Invalid login credentials")) {
+        errorMessage = "Credenciais inválidas. Por favor, verifique seu email e senha.";
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
+      setError(errorMessage);
+      
       toast({
         variant: "destructive",
         title: "Erro ao fazer login",
-        description: msg,
+        description: errorMessage,
       });
     } finally {
       setIsLoading(false);

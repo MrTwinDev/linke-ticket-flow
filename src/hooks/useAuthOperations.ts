@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { RegisterData, ProfileType, User, PersonType } from "@/types/auth";
@@ -27,12 +28,63 @@ export const useAuthOperations = ({
     try {
       console.log(`🟢 Attempting login as ${profileType} for ${email}`);
       
+      // Using signInWithPassword with option object format for better error handling
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
       
-      if (error) throw error;
+      if (error) {
+        console.error("🔴 Login error details:", error);
+        throw error;
+      }
+      
+      // Log successful authentication
+      console.log("✅ Authentication successful:", data);
+      
+      // Fetch user profile
+      if (data.user) {
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', data.user.id)
+          .single();
+          
+        if (profileError) {
+          console.error("🔴 Profile fetch error:", profileError);
+          throw new Error("Failed to fetch user profile");
+        }
+        
+        // Set user state based on profile
+        if (profileData) {
+          setCurrentUser({
+            id: data.user.id,
+            email: data.user.email || '',
+            profileType: profileData.profile_type as ProfileType,
+            personType: profileData.person_type as PersonType,
+            phone: profileData.phone,
+            documentNumber: profileData.document_number,
+            address: {
+              cep: profileData.cep,
+              street: profileData.street,
+              number: profileData.number,
+              complement: profileData.complement || undefined,
+              neighborhood: profileData.neighborhood,
+              city: profileData.city,
+              state: profileData.state,
+            },
+            ...(profileData.person_type === 'PF'
+              ? { fullName: profileData.full_name }
+              : {
+                  companyName: profileData.company_name,
+                  responsibleName: profileData.responsible_name,
+                  responsibleCpf: profileData.responsible_cpf,
+                }),
+          });
+          setProfileType(profileData.profile_type as ProfileType);
+          setIsAuthenticated(true);
+        }
+      }
       
       return data;
     } catch (err) {
@@ -61,9 +113,10 @@ export const useAuthOperations = ({
   const register = async (data: RegisterData) => {
     setIsLoading(true);
     try {
-      // Get the API key directly from the supabase client to ensure it's the correct one
+      // Get the API key directly from the supabase client
       const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhaW5sb3Nicmlzb3ZhdHh2eHh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY0NjkzMzQsImV4cCI6MjA2MjA0NTMzNH0.IUmUKVIU4mjE7iuwbm-V-pGbUDjP2dj_jAl9fzILJXs';
       
+      // Fix the fetch request with proper headers
       const response = await fetch('https://qainlosbrisovatxvxxx.supabase.co/functions/v1/autoconfirm-signup', {
         method: 'POST',
         headers: {
