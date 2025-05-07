@@ -1,3 +1,4 @@
+
 const register = async (data: RegisterData) => {
   setIsLoading(true);
   try {
@@ -5,8 +6,8 @@ const register = async (data: RegisterData) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'apikey': 'SUA_SUPABASE_ANON_KEY',
-        'Authorization': 'Bearer SUA_SUPABASE_ANON_KEY',
+        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhaW5sb3Nicmlzb3ZhdHh2eHh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY0NjkzMzQsImV4cCI6MjA2MjA0NTMzNH0.IUmUKVIU4mjE7iuwbm-V-pGbUDjP2dj_jAl9fzILJXs',
+        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhaW5sb3Nicmlzb3ZhdHh2eHh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY0NjkzMzQsImV4cCI6MjA2MjA0NTMzNH0.IUmUKVIU4mjE7iuwbm-V-pGbUDjP2dj_jAl9fzILJXs',
       },
       body: JSON.stringify({
         email: data.email,
