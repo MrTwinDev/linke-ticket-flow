@@ -11,6 +11,7 @@ import {
   AuthContextType 
 } from "@/types/auth";
 import { useAuthOperations } from "@/hooks/useAuthOperations";
+import { cleanupAuthState } from "@/integrations/supabase/client";
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -32,11 +33,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // Auth state listener
   useEffect(() => {
     console.log("🔄 Setting up auth state listener");
+    
+    // Clean up any existing auth state that might be invalid
+    cleanupAuthState();
+    
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      async (event, session) => {
         setIsLoading(true);
-        console.log("🔄 Auth state changed:", _event, !!session);
+        console.log("🔄 Auth state changed:", event, !!session);
         
         if (session?.user) {
           try {

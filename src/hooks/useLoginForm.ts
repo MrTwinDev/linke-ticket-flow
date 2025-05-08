@@ -50,6 +50,8 @@ export const useLoginForm = () => {
         errorMessage = "Erro de conexão com o servidor. Tente novamente mais tarde.";
       } else if (err.message?.includes("Invalid login credentials")) {
         errorMessage = "Credenciais inválidas. Por favor, verifique seu email e senha.";
+      } else if (err.message?.includes("Invalid API key")) {
+        errorMessage = "Problema na configuração da API. Por favor, contacte o suporte.";
       } else if (err.message) {
         errorMessage = err.message;
       }

@@ -28,6 +28,8 @@ export const useAuthOperations = ({
     console.log(`🟢 Attempting login as ${profileType} for ${email}`);
     
     try {
+      cleanupAuthState(); // Clean up any previous auth state
+      
       // Using signInWithPassword with option object format for better error handling
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -119,10 +121,11 @@ export const useAuthOperations = ({
     try {
       console.log("🟢 Attempting registration for:", data.email);
       
-      // Get the API key directly from the supabase client
-      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhaW5sb3Nicmlzb3ZhdHh2eHh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTUxNTQyNDMsImV4cCI6MjAyMDczMDg0M30.8Vvj3Aelw5vEjD4OcqPP92Vp6Lhd3RB-Dz0qpwR5O8A';
+      // Get the API key directly from our supabase client
+      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhaW5sb3Nicmlzb3ZhdHh2eHh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY0NjkzMzQsImV4cCI6MjA2MjA0NTMzNH0.IUmUKVIU4mjE7iuwbm-V-pGbUDjP2dj_jAl9fzILJXs';
       
       // Call the edge function to handle registration
+      console.log("🔄 Calling autoconfirm-signup edge function");
       const response = await fetch('https://qainlosbrisovatxvxxx.supabase.co/functions/v1/autoconfirm-signup', {
         method: 'POST',
         headers: {
@@ -153,6 +156,9 @@ export const useAuthOperations = ({
 
       const result = await response.json();
       console.log("✅ Registration successful:", result);
+
+      // Clean up any existing auth state before logging in
+      cleanupAuthState();
 
       // Automatically log in the user after successful registration
       console.log("🟢 Attempting auto-login after registration");
@@ -211,3 +217,6 @@ export const useAuthOperations = ({
     register
   };
 };
+
+// Import cleanupAuthState
+import { cleanupAuthState } from "@/integrations/supabase/client";
