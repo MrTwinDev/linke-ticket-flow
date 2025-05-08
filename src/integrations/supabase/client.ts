@@ -27,6 +27,11 @@ export const cleanupAuthState = () => {
   });
 };
 
+// Validate that we have required configuration
+if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+  console.error('[supabase] Missing required configuration. URL or anon key is missing.');
+}
+
 // DEBUG: log Supabase connection info
 console.log('[supabase] Initializing client with URL:', SUPABASE_URL);
 console.log('[supabase] ANON_KEY valid:', !!SUPABASE_ANON_KEY && SUPABASE_ANON_KEY.length > 20);
