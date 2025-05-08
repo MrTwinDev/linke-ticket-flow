@@ -242,7 +242,18 @@ const ProfilePage = () => {
     
     setIsDeleting(true);
     try {
-      // First try to delete the user from auth
+      // Soft delete the profile first
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({
+          deleted: true,
+          deleted_at: new Date().toISOString(),
+        })
+        .eq('id', currentUser.id);
+        
+      if (updateError) throw updateError;
+      
+      // Then try to delete the user from auth
       const { error: authError } = await supabase.auth.admin.deleteUser(
         currentUser.id
       );
@@ -252,8 +263,6 @@ const ProfilePage = () => {
         const { error } = await supabase.auth.admin.deleteUser(currentUser.id);
         if (error) throw error;
       }
-      
-      // Profile will be deleted automatically via cascade
       
       // Remove avatar if exists
       try {
