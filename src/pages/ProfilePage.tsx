@@ -218,12 +218,19 @@ const ProfilePage = () => {
       // Soft-delete no perfil
       const { error } = await supabase
         .from("profiles")
-        .update({ deleted: true, deleted_at: new Date().toISOString() })
+        .update({
+          deleted: true,
+          deleted_at: new Date().toISOString()
+        })
         .eq("id", currentUser.id);
-      if (error) throw error;
+        
+      if (error) {
+        console.error("Erro ao excluir conta (soft-delete):", error);
+        throw error;
+      }
 
       // Encerra sessão
-      await supabase.auth.signOut();
+      await logout();
       navigate("/login");
 
       toast({
@@ -295,5 +302,3 @@ const ProfilePage = () => {
 };
 
 export default ProfilePage;
-
-
