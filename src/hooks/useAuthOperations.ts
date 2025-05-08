@@ -1,6 +1,5 @@
 
-import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, cleanupAuthState } from "@/integrations/supabase/client";
 import { RegisterData, ProfileType, User, PersonType } from "@/types/auth";
 import { useToast } from "@/hooks/use-toast";
 
@@ -29,69 +28,50 @@ export const useAuthOperations = ({
     
     try {
       cleanupAuthState(); // Clean up any previous auth state
-      
-      // Using signInWithPassword with option object format for better error handling
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      
-      if (error) {
-        console.error("🔴 Login error details:", error);
-        throw error;
-      }
-      
-      // Log successful authentication
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+
       console.log("✅ Authentication successful:", data);
       
-      // Fetch user profile
       if (data.user) {
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
           .select('*')
           .eq('id', data.user.id)
           .single();
-          
-        if (profileError) {
-          console.error("🔴 Profile fetch error:", profileError);
-          throw new Error("Failed to fetch user profile");
-        }
-        
-        // Set user state based on profile
-        if (profileData) {
-          setCurrentUser({
-            id: data.user.id,
-            email: data.user.email || '',
-            profileType: profileData.profile_type as ProfileType,
-            personType: profileData.person_type as PersonType,
-            phone: profileData.phone,
-            documentNumber: profileData.document_number,
-            address: {
-              cep: profileData.cep,
-              street: profileData.street,
-              number: profileData.number,
-              complement: profileData.complement || undefined,
-              neighborhood: profileData.neighborhood,
-              city: profileData.city,
-              state: profileData.state,
-            },
-            ...(profileData.person_type === 'PF'
-              ? { fullName: profileData.full_name }
-              : {
-                  companyName: profileData.company_name,
-                  responsibleName: profileData.responsible_name,
-                  responsibleCpf: profileData.responsible_cpf,
-                }),
-          });
-          setProfileType(profileData.profile_type as ProfileType);
-          setIsAuthenticated(true);
-          
-          console.log("✅ User session established with profile type:", profileData.profile_type);
-        }
+        if (profileError) throw profileError;
+
+        setCurrentUser({
+          id: data.user.id,
+          email: data.user.email || '',
+          profileType: profileData.profile_type as ProfileType,
+          personType: profileData.person_type as PersonType,
+          phone: profileData.phone,
+          documentNumber: profileData.document_number,
+          address: {
+            cep: profileData.cep,
+            street: profileData.street,
+            number: profileData.number,
+            complement: profileData.complement || undefined,
+            neighborhood: profileData.neighborhood,
+            city: profileData.city,
+            state: profileData.state,
+          },
+          ...(profileData.person_type === 'PF'
+            ? { fullName: profileData.full_name }
+            : {
+                companyName: profileData.company_name,
+                responsibleName: profileData.responsible_name,
+                responsibleCpf: profileData.responsible_cpf,
+              }),
+        });
+        setProfileType(profileData.profile_type as ProfileType);
+        setIsAuthenticated(true);
+        console.log("✅ User session established with profile type:", profileData.profile_type);
       }
-      
+
       return data;
-    } catch (err) {
+    } catch (err: any) {
       console.error("🔴 Login error:", err);
       throw err;
     } finally {
@@ -108,8 +88,9 @@ export const useAuthOperations = ({
       setProfileType(null);
       setIsAuthenticated(false);
       console.log("✅ Logout successful");
-    } catch (err) {
+    } catch (err: any) {
       console.error("🔴 Logout error:", err);
+      toast({ variant: 'destructive', title: 'Falha ao sair', description: 'Não foi possível encerrar a sessão.' });
       throw err;
     } finally {
       setIsLoading(false);
@@ -120,89 +101,66 @@ export const useAuthOperations = ({
     setIsLoading(true);
     try {
       console.log("🟢 Attempting registration for:", data.email);
-      
-      // Get the API key directly from our supabase client
-      const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhaW5sb3Nicmlzb3ZhdHh2eHh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY0NjkzMzQsImV4cCI6MjA2MjA0NTMzNH0.IUmUKVIU4mjE7iuwbm-V-pGbUDjP2dj_jAl9fzILJXs';
-      
-      // Call the edge function to handle registration
-      console.log("🔄 Calling autoconfirm-signup edge function");
-      const response = await fetch('https://qainlosbrisovatxvxxx.supabase.co/functions/v1/autoconfirm-signup', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'apikey': supabaseKey,
-          'Authorization': `Bearer ${supabaseKey}`,
-        },
-        body: JSON.stringify({
-          email: data.email,
-          password: data.password,
-          profileType: data.profileType,
-          personType: data.personType,
-          phone: data.phone,
-          documentNumber: data.documentNumber,
-          address: data.address,
-          fullName: data.fullName,
-          companyName: data.companyName,
-          responsibleName: data.responsibleName,
-          responsibleCpf: data.responsibleCpf
-        })
-      });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        console.error("🔴 Registration error from edge function:", errorData);
-        throw new Error(errorData.message || 'Erro no registro.');
-      }
-
-      const result = await response.json();
-      console.log("✅ Registration successful:", result);
-
-      // Clean up any existing auth state before logging in
-      cleanupAuthState();
-
-      // Automatically log in the user after successful registration
-      console.log("🟢 Attempting auto-login after registration");
-      const { data: signInData, error: signInErr } = await supabase.auth.signInWithPassword({
+      // 1) Create user in Supabase Auth
+      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
         email: data.email,
         password: data.password,
       });
+      if (signUpError) throw signUpError;
+      const user = signUpData.user;
+      if (!user) throw new Error("Falha ao criar usuário.");
 
-      if (signInErr) {
-        console.error('🔴 Auto-login error:', signInErr);
-        throw new Error(`Cadastro realizado, mas o login falhou: ${signInErr.message}`);
+      // 2) Update profile record (trigger created the row)
+      const updates: any = {
+        profile_type:    data.profileType,
+        person_type:     data.personType,
+        phone:           data.phone,
+        document_number: data.documentNumber,
+        cep:             data.address.cep,
+        street:          data.address.street,
+        number:          data.address.number,
+        complement:      data.address.complement || null,
+        neighborhood:    data.address.neighborhood,
+        city:            data.address.city,
+        state:           data.address.state,
+      };
+      if (data.personType === 'PF') {
+        updates.full_name = data.fullName;
+      } else {
+        updates.company_name     = data.companyName;
+        updates.responsible_name = data.responsibleName;
+        updates.responsible_cpf  = data.responsibleCpf;
       }
+      const { error: updErr } = await supabase
+        .from('profiles')
+        .update(updates)
+        .eq('id', user.id);
+      if (updErr) throw updErr;
 
-      console.log("✅ Auto-login successful:", !!signInData.user);
-      
-      if (signInData.user) {
-        setIsAuthenticated(true);
-        setCurrentUser({
-          id: signInData.user.id,
-          email: signInData.user.email || '',
-          profileType: data.profileType,
-          personType: data.personType,
-          phone: data.phone,
-          documentNumber: data.documentNumber,
-          address: data.address,
-          ...(data.personType === 'PF'
-            ? { fullName: data.fullName }
-            : {
-                companyName: data.companyName,
-                responsibleName: data.responsibleName,
-                responsibleCpf: data.responsibleCpf,
-              }),
-        });
-        setProfileType(data.profileType);
-        
-        console.log("✅ User session established after registration");
-      }
-
-      toast({
-        title: "Registro bem-sucedido",
-        description: "Sua conta foi criada com sucesso e você foi autenticado.",
+      // 3) Session is already established by signUp, but we can set state manually
+      setIsAuthenticated(true);
+      setProfileType(data.profileType);
+      setCurrentUser({
+        id: user.id,
+        email: user.email || '',
+        profileType: data.profileType,
+        personType:  data.personType,
+        phone:       data.phone,
+        documentNumber: data.documentNumber,
+        address:        data.address,
+        ...(data.personType === 'PF'
+          ? { fullName: data.fullName }
+          : {
+              companyName:     data.companyName,
+              responsibleName: data.responsibleName,
+              responsibleCpf:  data.responsibleCpf,
+            }),
       });
+      console.log("✅ Registration and profile update successful");
 
-      return signInData;
+      toast({ title: "Registro bem-sucedido", description: "Sua conta foi criada com sucesso e você foi autenticado." });
+      return signUpData;
     } catch (err: any) {
       console.error('🔴 Registration error:', err);
       throw err;
@@ -211,12 +169,5 @@ export const useAuthOperations = ({
     }
   };
 
-  return {
-    login,
-    logout,
-    register
-  };
+  return { login, logout, register };
 };
-
-// Import cleanupAuthState
-import { cleanupAuthState } from "@/integrations/supabase/client";
