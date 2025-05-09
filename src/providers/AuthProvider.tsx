@@ -36,11 +36,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     // Clean up any existing auth state that might be invalid
     cleanupAuthState();
     
+    let hasInitialSessionChecked = false;
+    
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        setIsLoading(true);
         console.log("🔄 Auth state changed:", event, !!session);
+        setIsLoading(true);
         
         if (session?.user) {
           try {
@@ -54,6 +56,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 
               if (error) {
                 console.error('🔴 Error fetching profile:', error);
+                setCurrentUser(null);
+                setProfileType(null);
+                setIsAuthenticated(false);
+                setIsLoading(false);
+                return;
+              }
+
+              // Skip if profile is deleted
+              if (profile.deleted === true) {
+                console.warn('🔴 Account is deleted:', session.user.id);
+                await supabase.auth.signOut();
                 setCurrentUser(null);
                 setProfileType(null);
                 setIsAuthenticated(false);
@@ -115,12 +128,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     console.log("🔄 Checking for existing session");
     supabase.auth.getSession().then(({ data }) => {
       console.log("ℹ️ Initial session check:", !!data.session);
-      if (!data.session) setIsLoading(false);
+      if (!data.session) {
+        setIsLoading(false);
+      }
+      hasInitialSessionChecked = true;
     });
+
+    // Set a safety timeout to prevent hanging in loading state
+    const safetyTimeout = setTimeout(() => {
+      if (!hasInitialSessionChecked) {
+        console.warn('🟠 Safety timeout reached: forcing loading state to false');
+        setIsLoading(false);
+      }
+    }, 5000);
 
     return () => {
       console.log("🔄 Cleaning up auth state listener");
       subscription.unsubscribe();
+      clearTimeout(safetyTimeout);
     };
   }, []);
 

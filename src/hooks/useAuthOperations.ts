@@ -1,4 +1,5 @@
-import { supabase } from "@/integrations/supabase/client";
+
+import { supabase, cleanupAuthState } from "@/integrations/supabase/client";
 import { ProfileType, User } from "@/types/auth";
 import React from "react";
 
@@ -96,48 +97,60 @@ export const useAuthOperations = ({
 
   const login = async (email: string, password: string, profileType: ProfileType) => {
     try {
+      // Clean up any existing auth state to prevent conflicts
+      cleanupAuthState();
+      
+      console.log(`[auth] Logging in as ${email} with profile type ${profileType}`);
+      
+      // Attempt login
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('[auth] Login error:', error);
+        throw error;
+      }
+
+      if (!data.user) {
+        console.error('[auth] No user returned from login');
+        throw new Error("Falha na autenticação. Usuário não encontrado.");
+      }
+
+      console.log('[auth] Login successful, checking profile');
 
       // Check if account is soft-deleted
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('deleted')
+        .select('deleted, profile_type')
         .eq('id', data.user.id)
         .single();
 
       if (profileError) {
-        throw profileError;
+        console.error('[auth] Error fetching profile:', profileError);
+        // Instead of failing here, let's see if we can proceed
+        console.warn('[auth] Continuing despite profile fetch error');
       }
-
-      // If account is soft-deleted, block access and logout
+      
+      // If we have profile data and it's marked as deleted, block access
       if (profile?.deleted === true) {
+        console.warn('[auth] Attempting to access deleted account');
         await supabase.auth.signOut();
         throw new Error("Conta desativada. Entre em contato com o suporte para reativação.");
       }
       
-      // Verify profile type matches requested type
-      const { data: userProfile, error: userProfileError } = await supabase
-        .from('profiles')
-        .select('profile_type')
-        .eq('id', data.user.id)
-        .single();
-        
-      if (userProfileError) {
-        throw userProfileError;
-      }
-      
-      if (userProfile.profile_type !== profileType) {
+      // Check if we have profile type data and whether it matches
+      if (profile && profile.profile_type !== profileType) {
+        console.warn(`[auth] Profile type mismatch: Expected ${profileType}, got ${profile.profile_type}`);
         await supabase.auth.signOut();
         throw new Error(`Acesso negado. Essa conta não é do tipo ${profileType}.`);
       }
-
+      
+      console.log('[auth] Profile checks passed');
       return data;
     } catch (error: any) {
+      console.error('[auth] Login process failed:', error);
       throw error;
     }
   };

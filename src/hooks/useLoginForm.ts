@@ -28,6 +28,9 @@ export const useLoginForm = () => {
       // Clean up any existing auth state to prevent conflicts
       cleanupAuthState();
 
+      // Add small delay to ensure cleanup completes
+      await new Promise(resolve => setTimeout(resolve, 100));
+
       // Try the login operation
       const result = await login(email, password, profileType);
       
