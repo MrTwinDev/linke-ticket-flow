@@ -1,7 +1,7 @@
 
 // src/providers/AuthProvider.tsx
 import React, { createContext, useState, useEffect, ReactNode } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabase, cleanupAuthState } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { 
   User, 
@@ -11,7 +11,6 @@ import {
   AuthContextType 
 } from "@/types/auth";
 import { useAuthOperations } from "@/hooks/useAuthOperations";
-import { cleanupAuthState } from "@/integrations/supabase/client";
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 

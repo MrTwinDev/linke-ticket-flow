@@ -83,6 +83,7 @@ export const useAuthOperations = ({
     setIsLoading(true);
     try {
       console.log("🟢 Attempting logout");
+      cleanupAuthState(); // Clean up local storage first
       await supabase.auth.signOut();
       setCurrentUser(null);
       setProfileType(null);
@@ -101,6 +102,9 @@ export const useAuthOperations = ({
     setIsLoading(true);
     try {
       console.log("🟢 Attempting registration for:", data.email);
+      
+      // Clean up any existing auth state first
+      cleanupAuthState();
 
       // 1) Create user in Supabase Auth
       const { data: signUpData, error: signUpError } = await supabase.auth.signUp({

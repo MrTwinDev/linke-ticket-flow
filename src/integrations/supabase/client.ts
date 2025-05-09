@@ -3,9 +3,9 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-// Define hardcoded values for development
-const SUPABASE_URL = "https://qainlosbrisovatxvxxx.supabase.co";
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhaW5sb3Nicmlzb3ZhdHh2eHh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY0NjkzMzQsImV4cCI6MjA2MjA0NTMzNH0.IUmUKVIU4mjE7iuwbm-V-pGbUDjP2dj_jAl9fzILJXs';
+// Use environment variables for Supabase configuration
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Helper function to clean up auth state (important for preventing auth limbo states)
 export const cleanupAuthState = () => {
@@ -28,22 +28,23 @@ export const cleanupAuthState = () => {
 };
 
 // Validate that we have required configuration
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  console.error('[supabase] Missing required configuration. URL or anon key is missing.');
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('[supabase] Missing required configuration. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables.');
+  throw new Error('Supabase environment variables are not set.');
 }
 
 // DEBUG: log Supabase connection info
-console.log('[supabase] Initializing client with URL:', SUPABASE_URL);
-console.log('[supabase] ANON_KEY valid:', !!SUPABASE_ANON_KEY && SUPABASE_ANON_KEY.length > 20);
+console.log('[supabase] Initializing client with URL:', supabaseUrl);
+console.log('[supabase] ANON_KEY valid:', !!supabaseAnonKey && supabaseAnonKey.length > 20);
 
 export const supabase = createClient<Database>(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY,
+  supabaseUrl,
+  supabaseAnonKey,
   {
     auth: {
       persistSession: true,
       autoRefreshToken: true,
-      storageKey: 'sb-qainlosbrisovatxvxxx-auth-token',
+      storageKey: 'sb-auth-token',
     },
   }
 );
