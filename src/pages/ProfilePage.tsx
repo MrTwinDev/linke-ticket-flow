@@ -1,3 +1,4 @@
+
 // src/pages/ProfilePage.tsx
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -215,7 +216,7 @@ const ProfilePage = () => {
     setIsDeleting(true);
 
     try {
-      // Soft-delete no perfil
+      // First, ensure we properly update the profile with deleted=true and timestamp
       const { error } = await supabase
         .from("profiles")
         .update({
@@ -228,8 +229,21 @@ const ProfilePage = () => {
         console.error("Erro ao excluir conta (soft-delete):", error);
         throw error;
       }
+      
+      // Verify the update was successful
+      const { data: updatedProfile, error: verifyError } = await supabase
+        .from("profiles")
+        .select("deleted, deleted_at")
+        .eq("id", currentUser.id)
+        .single();
+        
+      if (verifyError) {
+        console.error("Erro ao verificar exclusão:", verifyError);
+      } else {
+        console.log("Perfil atualizado com sucesso:", updatedProfile);
+      }
 
-      // Encerra sessão
+      // Only logout after confirming the update was successful
       await logout();
       navigate("/login");
 

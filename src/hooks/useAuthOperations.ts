@@ -1,18 +1,6 @@
-
-import { supabase, cleanupAuthState } from "@/integrations/supabase/client";
-import { RegisterData, ProfileType, User, PersonType } from "@/types/auth";
-import { useToast } from "@/hooks/use-toast";
-
-// Define the toast type locally since it's not exported from use-toast
-type ToastFunction = ReturnType<typeof useToast>["toast"];
-
-interface UseAuthOperationsProps {
-  setCurrentUser: (user: User | null) => void;
-  setProfileType: (profileType: ProfileType | null) => void;
-  setIsAuthenticated: (isAuthenticated: boolean) => void;
-  setIsLoading: (isLoading: boolean) => void;
-  toast: ToastFunction;
-}
+import { supabase } from "@/integrations/supabase/client";
+import { ProfileType, User } from "@/types/auth";
+import React from "react";
 
 export const useAuthOperations = ({
   setCurrentUser,
@@ -20,158 +8,143 @@ export const useAuthOperations = ({
   setIsAuthenticated,
   setIsLoading,
   toast
-}: UseAuthOperationsProps) => {
-  
-  const login = async (email: string, password: string, profileType: ProfileType) => {
-    setIsLoading(true);
-    console.log(`🟢 Attempting login as ${profileType} for ${email}`);
-    
+}: {
+  setCurrentUser: React.Dispatch<React.SetStateAction<User | null>>;
+  setProfileType: React.Dispatch<React.SetStateAction<ProfileType | null>>;
+  setIsAuthenticated: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  toast: any;
+}) => {
+  const register = async (data: any) => {
     try {
-      cleanupAuthState(); // Clean up any previous auth state
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) throw error;
+      const { email, password, profileType, personType, fullName, companyName, phone, documentNumber, responsibleName, responsibleCpf, address } = data;
 
-      console.log("✅ Authentication successful:", data);
-      
-      if (data.user) {
-        const { data: profileData, error: profileError } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', data.user.id)
-          .single();
-        if (profileError) throw profileError;
-
-        setCurrentUser({
-          id: data.user.id,
-          email: data.user.email || '',
-          profileType: profileData.profile_type as ProfileType,
-          personType: profileData.person_type as PersonType,
-          phone: profileData.phone,
-          documentNumber: profileData.document_number,
-          address: {
-            cep: profileData.cep,
-            street: profileData.street,
-            number: profileData.number,
-            complement: profileData.complement || undefined,
-            neighborhood: profileData.neighborhood,
-            city: profileData.city,
-            state: profileData.state,
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            profileType,
+            personType,
+            fullName,
+            companyName,
+            phone,
+            documentNumber,
+            responsibleName,
+            responsibleCpf,
+            address,
           },
-          ...(profileData.person_type === 'PF'
-            ? { fullName: profileData.full_name }
-            : {
-                companyName: profileData.company_name,
-                responsibleName: profileData.responsible_name,
-                responsibleCpf: profileData.responsible_cpf,
-              }),
-        });
-        setProfileType(profileData.profile_type as ProfileType);
-        setIsAuthenticated(true);
-        console.log("✅ User session established with profile type:", profileData.profile_type);
+        },
+      });
+
+      if (authError) {
+        throw authError;
       }
 
-      return data;
-    } catch (err: any) {
-      console.error("🔴 Login error:", err);
-      throw err;
-    } finally {
-      setIsLoading(false);
+      const { error: profileError } = await supabase.from('profiles').insert([
+        {
+          id: authData.user.id,
+          email,
+          profile_type: profileType,
+          person_type: personType,
+          full_name: fullName,
+          company_name: companyName,
+          phone,
+          document_number: documentNumber,
+          responsible_name: responsibleName,
+          responsible_cpf: responsibleCpf,
+          cep: address.cep,
+          street: address.street,
+          number: address.number,
+          complement: address.complement,
+          neighborhood: address.neighborhood,
+          city: address.city,
+          state: address.state,
+        },
+      ]);
+
+      if (profileError) {
+        throw profileError;
+      }
+
+      return authData;
+    } catch (error: any) {
+      console.error("🚀 ~ file: useAuthOperations.ts:48 ~ register ~ error:", error)
+      throw error;
     }
   };
-  
+
   const logout = async () => {
-    setIsLoading(true);
     try {
-      console.log("🟢 Attempting logout");
-      cleanupAuthState(); // Clean up local storage first
-      await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
       setCurrentUser(null);
       setProfileType(null);
       setIsAuthenticated(false);
-      console.log("✅ Logout successful");
-    } catch (err: any) {
-      console.error("🔴 Logout error:", err);
-      toast({ variant: 'destructive', title: 'Falha ao sair', description: 'Não foi possível encerrar a sessão.' });
-      throw err;
-    } finally {
-      setIsLoading(false);
+      toast({
+        title: "Logout bem-sucedido",
+        description: "Você foi desconectado com segurança.",
+      });
+    } catch (error: any) {
+      toast({
+        variant: "destructive",
+        title: "Erro ao fazer logout",
+        description: error.message || "Tente novamente mais tarde.",
+      });
     }
   };
 
-  const register = async (data: RegisterData) => {
-    setIsLoading(true);
+  const login = async (email: string, password: string, profileType: ProfileType) => {
     try {
-      console.log("🟢 Attempting registration for:", data.email);
-      
-      // Clean up any existing auth state first
-      cleanupAuthState();
-
-      // 1) Create user in Supabase Auth
-      const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
-        email: data.email,
-        password: data.password,
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
-      if (signUpError) throw signUpError;
-      const user = signUpData.user;
-      if (!user) throw new Error("Falha ao criar usuário.");
 
-      // 2) Update profile record (trigger created the row)
-      const updates: any = {
-        profile_type:    data.profileType,
-        person_type:     data.personType,
-        phone:           data.phone,
-        document_number: data.documentNumber,
-        cep:             data.address.cep,
-        street:          data.address.street,
-        number:          data.address.number,
-        complement:      data.address.complement || null,
-        neighborhood:    data.address.neighborhood,
-        city:            data.address.city,
-        state:           data.address.state,
-      };
-      if (data.personType === 'PF') {
-        updates.full_name = data.fullName;
-      } else {
-        updates.company_name     = data.companyName;
-        updates.responsible_name = data.responsibleName;
-        updates.responsible_cpf  = data.responsibleCpf;
-      }
-      const { error: updErr } = await supabase
+      if (error) throw error;
+
+      // Check if account is soft-deleted
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .update(updates)
-        .eq('id', user.id);
-      if (updErr) throw updErr;
+        .select('deleted')
+        .eq('id', data.user.id)
+        .single();
 
-      // 3) Session is already established by signUp, but we can set state manually
-      setIsAuthenticated(true);
-      setProfileType(data.profileType);
-      setCurrentUser({
-        id: user.id,
-        email: user.email || '',
-        profileType: data.profileType,
-        personType:  data.personType,
-        phone:       data.phone,
-        documentNumber: data.documentNumber,
-        address:        data.address,
-        ...(data.personType === 'PF'
-          ? { fullName: data.fullName }
-          : {
-              companyName:     data.companyName,
-              responsibleName: data.responsibleName,
-              responsibleCpf:  data.responsibleCpf,
-            }),
-      });
-      console.log("✅ Registration and profile update successful");
+      if (profileError) {
+        throw profileError;
+      }
 
-      toast({ title: "Registro bem-sucedido", description: "Sua conta foi criada com sucesso e você foi autenticado." });
-      return signUpData;
-    } catch (err: any) {
-      console.error('🔴 Registration error:', err);
-      throw err;
-    } finally {
-      setIsLoading(false);
+      // If account is soft-deleted, block access and logout
+      if (profile?.deleted === true) {
+        await supabase.auth.signOut();
+        throw new Error("Conta desativada. Entre em contato com o suporte para reativação.");
+      }
+      
+      // Verify profile type matches requested type
+      const { data: userProfile, error: userProfileError } = await supabase
+        .from('profiles')
+        .select('profile_type')
+        .eq('id', data.user.id)
+        .single();
+        
+      if (userProfileError) {
+        throw userProfileError;
+      }
+      
+      if (userProfile.profile_type !== profileType) {
+        await supabase.auth.signOut();
+        throw new Error(`Acesso negado. Essa conta não é do tipo ${profileType}.`);
+      }
+
+      return data;
+    } catch (error: any) {
+      throw error;
     }
   };
 
-  return { login, logout, register };
+  return {
+    login,
+    logout,
+    register
+  };
 };

@@ -1,3 +1,4 @@
+
 // src/integrations/supabase/client.ts
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
@@ -16,20 +17,30 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
 
 // Helper to clean up any leftover auth tokens
 export function cleanupAuthState() {
+  console.log('[supabase] Cleaning up auth state');
+  
   // Remove Supabase session tokens
   localStorage.removeItem('supabase.auth.token');
+  
+  // Clear all Supabase auth-related keys in localStorage
   Object.keys(localStorage).forEach(key => {
     if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+      console.log(`[supabase] Removing localStorage key: ${key}`);
       localStorage.removeItem(key);
     }
   });
-  if (sessionStorage) {
+  
+  // Clear all Supabase auth-related keys in sessionStorage
+  if (typeof sessionStorage !== 'undefined') {
     Object.keys(sessionStorage).forEach(key => {
       if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
+        console.log(`[supabase] Removing sessionStorage key: ${key}`);
         sessionStorage.removeItem(key);
       }
     });
   }
+  
+  console.log('[supabase] Auth state cleanup complete');
 }
 
 // Initialize Supabase client
@@ -49,6 +60,7 @@ export const supabase = createClient<Database>(
 console.log('[supabase] Initializing client with URL:', SUPABASE_URL);
 console.log('[supabase] Anonymous key present:', SUPABASE_ANON_KEY.length > 20);
 
+// Test connection
 supabase.auth.getSession()
   .then(({ data, error }) => {
     if (error) console.error('[supabase] Connection test failed:', error);
