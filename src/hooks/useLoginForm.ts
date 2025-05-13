@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { ProfileType } from "@/types/auth";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { cleanupAuthState } from "@/integrations/supabase/client";
 
 export const useLoginForm = () => {
   const [email, setEmail] = useState("");
@@ -25,14 +24,9 @@ export const useLoginForm = () => {
     try {
       console.log("🟢 Login attempt:", { email, profileType });
       
-      // Clean up any existing auth state to prevent conflicts - but don't do it twice
-      // (it's already done in the login function)
-      cleanupAuthState();
+      // No need to clean up auth state here
 
-      // Add small delay to ensure cleanup completes
-      await new Promise(resolve => setTimeout(resolve, 200));
-
-      // Try the login operation
+      // Try the login operation directly
       const result = await login(email, password, profileType);
       
       console.log("✅ Login successful", result);

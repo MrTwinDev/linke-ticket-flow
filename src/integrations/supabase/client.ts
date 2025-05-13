@@ -8,34 +8,20 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://qainlosbrisov
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY ||
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhaW5sb3Nicmlzb3ZhdHh2eHh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY3NDQ1ODQsImV4cCI6MjA2MjMyMDU4NH0.lclY8r3E25zZbvhPboYVNj0qZGuL4sM2EopH3G_BvAI';
 
-// Helper to clean up any leftover auth tokens
+// Helper to clean up any leftover auth tokens - Only remove Supabase specific tokens
 export function cleanupAuthState() {
   console.log('[supabase] Cleaning up auth state...');
   
   try {
-    // Remove Supabase session tokens
-    localStorage.removeItem('supabase.auth.token');
+    // Only remove Supabase session tokens to avoid conflicts
+    const currentStorageKey = `sb-${SUPABASE_URL.split('//')[1].split('.')[0]}-auth-token`;
     
-    // Clear all Supabase auth-related keys in localStorage
-    Object.keys(localStorage).forEach(key => {
-      if (key.startsWith('supabase.auth.') || 
-          key.includes('sb-') || 
-          key.includes('supabase.')) {
-        console.log(`[supabase] Removing localStorage key: ${key}`);
-        localStorage.removeItem(key);
-      }
-    });
+    // Clear localStorage and sessionStorage in safe manner
+    // Only clear the exact keys we need to clear to prevent removing unrelated data
+    localStorage.removeItem(currentStorageKey);
     
-    // Clear all Supabase auth-related keys in sessionStorage
     if (typeof sessionStorage !== 'undefined') {
-      Object.keys(sessionStorage).forEach(key => {
-        if (key.startsWith('supabase.auth.') || 
-            key.includes('sb-') || 
-            key.includes('supabase.')) {
-          console.log(`[supabase] Removing sessionStorage key: ${key}`);
-          sessionStorage.removeItem(key);
-        }
-      });
+      sessionStorage.removeItem(currentStorageKey);
     }
     
     console.log('[supabase] Auth state cleanup complete');
@@ -52,7 +38,7 @@ export const supabase = createClient<Database>(
     auth: {
       persistSession: true,
       autoRefreshToken: true,
-      storageKey: 'sb-qainlosbrisovatxvxxx-auth-token',
+      storageKey: `sb-${SUPABASE_URL.split('//')[1].split('.')[0]}-auth-token`,
       debug: true, // Enable debug logs for authentication issues
     },
   }

@@ -1,5 +1,5 @@
 
-import { supabase, cleanupAuthState } from "@/integrations/supabase/client";
+import { supabase } from "@/integrations/supabase/client";
 import { ProfileType, User } from "@/types/auth";
 import React from "react";
 
@@ -20,9 +20,9 @@ export const useAuthOperations = ({
     try {
       const { email, password, profileType, personType, fullName, companyName, phone, documentNumber, responsibleName, responsibleCpf, address } = data;
 
-      // First clean up any existing auth state to prevent conflicts
-      cleanupAuthState();
-
+      // First clean up any existing auth state to prevent conflicts - but don't be too aggressive
+      // Don't call cleanupAuthState() here as it might interfere with the registration flow
+      
       // Sign up the user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
@@ -90,10 +90,8 @@ export const useAuthOperations = ({
 
   const logout = async () => {
     try {
-      // First clean up auth state
-      cleanupAuthState();
-      
-      // Then sign out
+      console.log("[auth] Logging out user");
+      // Sign out without cleaning up auth state first
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       
@@ -117,15 +115,12 @@ export const useAuthOperations = ({
 
   const login = async (email: string, password: string, profileType: ProfileType) => {
     try {
-      // Clean up any existing auth state to prevent conflicts
-      cleanupAuthState();
-
-      // Add delay to ensure cleanup completes
-      await new Promise(resolve => setTimeout(resolve, 200));
+      // Don't clean up auth state as it might be causing issues with valid sessions
+      // Let Supabase handle token management
       
       console.log(`[auth] Logging in as ${email} with profile type ${profileType}`);
       
-      // Attempt login
+      // Attempt login - No need for delay, let Supabase handle it
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -163,9 +158,8 @@ export const useAuthOperations = ({
         throw new Error("Conta desativada. Entre em contato com o suporte para reativação.");
       }
       
-      // Simplified profile type check to avoid blocking valid logins
-      // Only block if we're certain the profile type doesn't match
-      if (profile && profile.profile_type !== null && profile.profile_type !== profileType) {
+      // Only block if profile type is explicitly different
+      if (profile && profile.profile_type && profile.profile_type !== profileType) {
         console.warn(`[auth] Profile type mismatch: Expected ${profileType}, got ${profile.profile_type}`);
         await supabase.auth.signOut();
         throw new Error(`Acesso negado. Essa conta não é do tipo ${profileType}.`);
