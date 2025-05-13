@@ -39,11 +39,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
         console.log("🔄 Auth state changed:", event, !!session);
+        
+        // Always set loading to true when auth state changes
         setIsLoading(true);
         
         if (session?.user) {
           try {
-            // Use immediate function to fetch profile
+            // Fetch profile immediately after auth state change
             const { data: profile, error } = await supabase
               .from('profiles')
               .select('*')
@@ -63,7 +65,22 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             if (!profile) {
               console.warn('🟠 No profile found for user:', session.user.id);
               // For new registrations, set authenticated based on session presence
-              setIsAuthenticated(!!session);
+              setCurrentUser({
+                id: session.user.id,
+                email: session.user.email || '',
+                profileType: session.user.user_metadata.profileType || 'importer',
+                personType: session.user.user_metadata.personType || 'PF',
+                address: {
+                  cep: '',
+                  street: '',
+                  number: '',
+                  neighborhood: '',
+                  city: '',
+                  state: '',
+                }
+              });
+              setProfileType(session.user.user_metadata.profileType || 'importer');
+              setIsAuthenticated(true);
               setIsLoading(false);
               return;
             }
@@ -133,6 +150,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     supabase.auth.getSession().then(({ data }) => {
       console.log("ℹ️ Initial session check:", !!data.session);
       if (!data.session) {
+        // Only set loading to false if no session found
         setIsLoading(false);
       }
       hasInitialSessionChecked = true;
@@ -144,7 +162,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         console.warn('🟠 Safety timeout reached: forcing loading state to false');
         setIsLoading(false);
       }
-    }, 5000);
+    }, 3000); // Reduced timeout to 3 seconds for faster feedback
 
     return () => {
       console.log("🔄 Cleaning up auth state listener");

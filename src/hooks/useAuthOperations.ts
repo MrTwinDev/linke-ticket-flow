@@ -19,9 +19,6 @@ export const useAuthOperations = ({
   const register = async (data: any) => {
     try {
       const { email, password, profileType, personType, fullName, companyName, phone, documentNumber, responsibleName, responsibleCpf, address } = data;
-
-      // First clean up any existing auth state to prevent conflicts - but don't be too aggressive
-      // Don't call cleanupAuthState() here as it might interfere with the registration flow
       
       // Sign up the user
       const { data: authData, error: authError } = await supabase.auth.signUp({
@@ -91,7 +88,6 @@ export const useAuthOperations = ({
   const logout = async () => {
     try {
       console.log("[auth] Logging out user");
-      // Sign out without cleaning up auth state first
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       
@@ -104,23 +100,24 @@ export const useAuthOperations = ({
         title: "Logout bem-sucedido",
         description: "Você foi desconectado com segurança.",
       });
+      
+      return true;
     } catch (error: any) {
+      console.error('[auth] Logout error:', error);
       toast({
         variant: "destructive",
         title: "Erro ao fazer logout",
         description: error.message || "Tente novamente mais tarde.",
       });
+      throw error;
     }
   };
 
   const login = async (email: string, password: string, profileType: ProfileType) => {
     try {
-      // Don't clean up auth state as it might be causing issues with valid sessions
-      // Let Supabase handle token management
-      
       console.log(`[auth] Logging in as ${email} with profile type ${profileType}`);
       
-      // Attempt login - No need for delay, let Supabase handle it
+      // Attempt login
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -147,8 +144,7 @@ export const useAuthOperations = ({
 
       if (profileError) {
         console.error('[auth] Error fetching profile:', profileError);
-        // If we can't fetch the profile, we should proceed with caution
-        console.warn('[auth] Profile fetch error, proceeding with login');
+        // Don't throw here - just log and proceed
       }
       
       // If we have profile data and it's marked as deleted, block access
@@ -158,14 +154,16 @@ export const useAuthOperations = ({
         throw new Error("Conta desativada. Entre em contato com o suporte para reativação.");
       }
       
-      // Only block if profile type is explicitly different
+      // Only block if profile type is explicitly different and we have confirmed the profile type
       if (profile && profile.profile_type && profile.profile_type !== profileType) {
         console.warn(`[auth] Profile type mismatch: Expected ${profileType}, got ${profile.profile_type}`);
         await supabase.auth.signOut();
         throw new Error(`Acesso negado. Essa conta não é do tipo ${profileType}.`);
       }
       
-      console.log('[auth] Profile checks passed');
+      console.log('[auth] Profile checks passed, returning session data');
+      
+      // Return session data for further processing
       return data;
     } catch (error: any) {
       console.error('[auth] Login process failed:', error);

@@ -24,19 +24,22 @@ export const useLoginForm = () => {
     try {
       console.log("🟢 Login attempt:", { email, profileType });
       
-      // No need to clean up auth state here
-
-      // Try the login operation directly
+      // Try the login operation
       const result = await login(email, password, profileType);
       
-      console.log("✅ Login successful", result);
+      console.log("✅ Login successful, showing success toast");
 
       toast({
         title: "Login bem-sucedido",
         description: `Bem-vindo de volta, ${profileType === "importer" ? "importador" : "despachante"}.`,
       });
 
+      // Reset form state after successful login
+      setIsLoading(false);
+      
       console.log("🚀 Redirecting to /dashboard...");
+      // Use navigate here to ensure the redirection happens even if the 
+      // automatic redirect in Login.tsx useEffect doesn't trigger
       navigate("/dashboard");
     } catch (err: any) {
       console.error("🔴 Login error:", err);
@@ -55,14 +58,13 @@ export const useLoginForm = () => {
       }
       
       setError(errorMessage);
+      setIsLoading(false);
       
       toast({
         variant: "destructive",
         title: "Erro ao fazer login",
         description: errorMessage,
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 

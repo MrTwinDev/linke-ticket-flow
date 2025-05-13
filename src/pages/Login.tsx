@@ -10,6 +10,7 @@ import Header from "@/components/Header";
 import { useAuth } from "@/hooks/useAuth";
 import { useLoginForm } from "@/hooks/useLoginForm";
 import { ProfileType } from "@/types/auth"; 
+import ErrorMessage from "@/components/register/ErrorMessage";
 
 const Login: React.FC = () => {
   const {
@@ -27,12 +28,19 @@ const Login: React.FC = () => {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect after authentication
+  // Redirect after authentication - improved to handle edge cases
   useEffect(() => {
     console.log("Login.tsx • auth state:", { isAuthenticated, authLoading });
+    
+    // Only redirect if we know the user is authenticated and we're not currently loading
     if (!authLoading && isAuthenticated) {
       console.log("🚀 User authenticated → redirecting to /dashboard");
-      navigate("/dashboard");
+      // Use a short timeout to ensure the state is stable before redirecting
+      const redirectTimeout = setTimeout(() => {
+        navigate("/dashboard");
+      }, 100);
+      
+      return () => clearTimeout(redirectTimeout);
     }
   }, [authLoading, isAuthenticated, navigate]);
 
@@ -49,11 +57,7 @@ const Login: React.FC = () => {
             </p>
           </div>
 
-          {error && (
-            <div className="p-3 bg-red-100 text-red-800 rounded">
-              {error}
-            </div>
-          )}
+          {error && <ErrorMessage message={error} />}
 
           <Tabs
             value={profileType}
