@@ -85,7 +85,7 @@ export const useAuthOperations = ({
     }
   };
 
-  const logout = async () => {
+  const logout = async (): Promise<void> => { // Changed return type to void
     try {
       console.log("[auth] Logging out user");
       const { error } = await supabase.auth.signOut();
@@ -101,7 +101,7 @@ export const useAuthOperations = ({
         description: "Você foi desconectado com segurança.",
       });
       
-      return true;
+      // Don't return the boolean value
     } catch (error: any) {
       console.error('[auth] Logout error:', error);
       toast({

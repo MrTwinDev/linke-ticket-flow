@@ -70,6 +70,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 email: session.user.email || '',
                 profileType: session.user.user_metadata.profileType || 'importer',
                 personType: session.user.user_metadata.personType || 'PF',
+                phone: '', // Add missing required property
+                documentNumber: '', // Add missing required property
                 address: {
                   cep: '',
                   street: '',
