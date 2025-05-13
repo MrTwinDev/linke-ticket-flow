@@ -8,42 +8,43 @@ const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL || 'https://qainlosbrisov
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY ||
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFhaW5sb3Nicmlzb3ZhdHh2eHh4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY3NDQ1ODQsImV4cCI6MjA2MjMyMDU4NH0.lclY8r3E25zZbvhPboYVNj0qZGuL4sM2EopH3G_BvAI';
 
-// Warn if variables are missing
-if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-  console.error(
-    '[supabase] Missing configuration: please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env'
-  );
-}
-
 // Helper to clean up any leftover auth tokens
 export function cleanupAuthState() {
-  console.log('[supabase] Cleaning up auth state');
+  console.log('[supabase] Cleaning up auth state...');
   
-  // Remove Supabase session tokens
-  localStorage.removeItem('supabase.auth.token');
-  
-  // Clear all Supabase auth-related keys in localStorage
-  Object.keys(localStorage).forEach(key => {
-    if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-      console.log(`[supabase] Removing localStorage key: ${key}`);
-      localStorage.removeItem(key);
-    }
-  });
-  
-  // Clear all Supabase auth-related keys in sessionStorage
-  if (typeof sessionStorage !== 'undefined') {
-    Object.keys(sessionStorage).forEach(key => {
-      if (key.startsWith('supabase.auth.') || key.includes('sb-')) {
-        console.log(`[supabase] Removing sessionStorage key: ${key}`);
-        sessionStorage.removeItem(key);
+  try {
+    // Remove Supabase session tokens
+    localStorage.removeItem('supabase.auth.token');
+    
+    // Clear all Supabase auth-related keys in localStorage
+    Object.keys(localStorage).forEach(key => {
+      if (key.startsWith('supabase.auth.') || 
+          key.includes('sb-') || 
+          key.includes('supabase.')) {
+        console.log(`[supabase] Removing localStorage key: ${key}`);
+        localStorage.removeItem(key);
       }
     });
+    
+    // Clear all Supabase auth-related keys in sessionStorage
+    if (typeof sessionStorage !== 'undefined') {
+      Object.keys(sessionStorage).forEach(key => {
+        if (key.startsWith('supabase.auth.') || 
+            key.includes('sb-') || 
+            key.includes('supabase.')) {
+          console.log(`[supabase] Removing sessionStorage key: ${key}`);
+          sessionStorage.removeItem(key);
+        }
+      });
+    }
+    
+    console.log('[supabase] Auth state cleanup complete');
+  } catch (err) {
+    console.error('[supabase] Error during auth state cleanup:', err);
   }
-  
-  console.log('[supabase] Auth state cleanup complete');
 }
 
-// Initialize Supabase client
+// Initialize Supabase client with explicit configuration
 export const supabase = createClient<Database>(
   SUPABASE_URL,
   SUPABASE_ANON_KEY,
@@ -52,13 +53,14 @@ export const supabase = createClient<Database>(
       persistSession: true,
       autoRefreshToken: true,
       storageKey: 'sb-qainlosbrisovatxvxxx-auth-token',
+      debug: true, // Enable debug logs for authentication issues
     },
   }
 );
 
 // Debug initialization
 console.log('[supabase] Initializing client with URL:', SUPABASE_URL);
-console.log('[supabase] Anonymous key present:', SUPABASE_ANON_KEY.length > 20);
+console.log('[supabase] Anonymous key present:', SUPABASE_ANON_KEY.length > 0);
 
 // Test connection
 supabase.auth.getSession()

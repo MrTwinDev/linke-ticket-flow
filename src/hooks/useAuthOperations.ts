@@ -20,6 +20,10 @@ export const useAuthOperations = ({
     try {
       const { email, password, profileType, personType, fullName, companyName, phone, documentNumber, responsibleName, responsibleCpf, address } = data;
 
+      // First clean up any existing auth state to prevent conflicts
+      cleanupAuthState();
+
+      // Sign up the user
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
@@ -42,6 +46,13 @@ export const useAuthOperations = ({
         throw authError;
       }
 
+      if (!authData.user?.id) {
+        throw new Error("Failed to create user account");
+      }
+
+      console.log("🟢 User registered successfully:", authData.user.id);
+
+      // Create profile entry (this might be handled automatically by a trigger)
       const { error: profileError } = await supabase.from('profiles').insert([
         {
           id: authData.user.id,
@@ -65,23 +76,32 @@ export const useAuthOperations = ({
       ]);
 
       if (profileError) {
+        console.error("🔴 Error creating profile:", profileError);
         throw profileError;
       }
 
+      console.log("✅ Profile created successfully");
       return authData;
     } catch (error: any) {
-      console.error("🚀 ~ file: useAuthOperations.ts:48 ~ register ~ error:", error)
+      console.error("🚀 ~ file: useAuthOperations.ts ~ register ~ error:", error);
       throw error;
     }
   };
 
   const logout = async () => {
     try {
+      // First clean up auth state
+      cleanupAuthState();
+      
+      // Then sign out
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
+      
+      // Update state
       setCurrentUser(null);
       setProfileType(null);
       setIsAuthenticated(false);
+      
       toast({
         title: "Logout bem-sucedido",
         description: "Você foi desconectado com segurança.",
@@ -99,6 +119,9 @@ export const useAuthOperations = ({
     try {
       // Clean up any existing auth state to prevent conflicts
       cleanupAuthState();
+
+      // Add delay to ensure cleanup completes
+      await new Promise(resolve => setTimeout(resolve, 200));
       
       console.log(`[auth] Logging in as ${email} with profile type ${profileType}`);
       
@@ -125,12 +148,12 @@ export const useAuthOperations = ({
         .from('profiles')
         .select('deleted, profile_type')
         .eq('id', data.user.id)
-        .single();
+        .maybeSingle();
 
       if (profileError) {
         console.error('[auth] Error fetching profile:', profileError);
-        // Instead of failing here, let's see if we can proceed
-        console.warn('[auth] Continuing despite profile fetch error');
+        // If we can't fetch the profile, we should proceed with caution
+        console.warn('[auth] Profile fetch error, proceeding with login');
       }
       
       // If we have profile data and it's marked as deleted, block access
@@ -140,8 +163,9 @@ export const useAuthOperations = ({
         throw new Error("Conta desativada. Entre em contato com o suporte para reativação.");
       }
       
-      // Check if we have profile type data and whether it matches
-      if (profile && profile.profile_type !== profileType) {
+      // Simplified profile type check to avoid blocking valid logins
+      // Only block if we're certain the profile type doesn't match
+      if (profile && profile.profile_type !== null && profile.profile_type !== profileType) {
         console.warn(`[auth] Profile type mismatch: Expected ${profileType}, got ${profile.profile_type}`);
         await supabase.auth.signOut();
         throw new Error(`Acesso negado. Essa conta não é do tipo ${profileType}.`);

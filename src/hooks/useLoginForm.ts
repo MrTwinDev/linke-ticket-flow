@@ -25,11 +25,12 @@ export const useLoginForm = () => {
     try {
       console.log("🟢 Login attempt:", { email, profileType });
       
-      // Clean up any existing auth state to prevent conflicts
+      // Clean up any existing auth state to prevent conflicts - but don't do it twice
+      // (it's already done in the login function)
       cleanupAuthState();
 
       // Add small delay to ensure cleanup completes
-      await new Promise(resolve => setTimeout(resolve, 100));
+      await new Promise(resolve => setTimeout(resolve, 200));
 
       // Try the login operation
       const result = await login(email, password, profileType);

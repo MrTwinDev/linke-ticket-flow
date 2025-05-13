@@ -34,7 +34,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     console.log("🔄 Setting up auth state listener");
     
     // Clean up any existing auth state that might be invalid
-    cleanupAuthState();
+    // cleanupAuthState(); - Removing this to prevent wiping out valid sessions
     
     let hasInitialSessionChecked = false;
     
@@ -52,13 +52,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 .from('profiles')
                 .select('*')
                 .eq('id', session.user.id)
-                .single();
+                .maybeSingle();
                 
               if (error) {
                 console.error('🔴 Error fetching profile:', error);
                 setCurrentUser(null);
                 setProfileType(null);
                 setIsAuthenticated(false);
+                setIsLoading(false);
+                return;
+              }
+
+              // If no profile found, possibly a new registration
+              if (!profile) {
+                console.warn('🟠 No profile found for user:', session.user.id);
+                // For new registrations, we might need to wait for profile creation
+                // We'll set authenticated based on session presence
+                setIsAuthenticated(!!session);
                 setIsLoading(false);
                 return;
               }
@@ -80,16 +90,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 email: session.user.email || '',
                 profileType: profile.profile_type as ProfileType,
                 personType: profile.person_type as PersonType,
-                phone: profile.phone,
-                documentNumber: profile.document_number,
+                phone: profile.phone || '',
+                documentNumber: profile.document_number || '',
                 address: {
-                  cep: profile.cep,
-                  street: profile.street,
-                  number: profile.number,
+                  cep: profile.cep || '',
+                  street: profile.street || '',
+                  number: profile.number || '',
                   complement: profile.complement || undefined,
-                  neighborhood: profile.neighborhood,
-                  city: profile.city,
-                  state: profile.state,
+                  neighborhood: profile.neighborhood || '',
+                  city: profile.city || '',
+                  state: profile.state || '',
                 },
               };
               
