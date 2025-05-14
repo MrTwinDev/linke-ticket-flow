@@ -1,4 +1,3 @@
-
 // src/pages/Login.tsx
 import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -35,7 +34,7 @@ const Login: React.FC = () => {
     // Only redirect if we know the user is authenticated and we're not currently loading
     if (!authLoading && isAuthenticated) {
       console.log("🚀 User authenticated → redirecting to /dashboard");
-      navigate("/dashboard");
+      navigate("/dashboard", { replace: true });
     }
   }, [authLoading, isAuthenticated, navigate]);
 

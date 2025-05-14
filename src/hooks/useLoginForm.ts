@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ProfileType } from "@/types/auth";
@@ -34,12 +33,18 @@ export const useLoginForm = () => {
         description: `Bem-vindo de volta, ${profileType === "importer" ? "importador" : "despachante"}.`,
       });
 
-      // Reset loading state before navigation
-      setIsLoading(false);
+      // Force navigation here immediately after successful login 
+      // instead of waiting for the useEffect in Login.tsx
+      console.log("🚀 Forcing navigation to /dashboard");
+      window.location.href = "/dashboard";
       
-      console.log("🚀 Redirecionando para /dashboard...");
-      // Force navigation here to ensure redirection happens even if useEffect doesn't trigger
-      navigate("/dashboard");
+      // If window.location.href navigation doesn't execute for some reason,
+      // keep the React Router navigation as fallback
+      setTimeout(() => {
+        setIsLoading(false);
+        navigate("/dashboard");
+      }, 100);
+      
     } catch (err: any) {
       console.error("🔴 Erro de login:", err);
       
