@@ -30,7 +30,7 @@ const MobileMenu = ({ isOpen, onLogout }: MobileMenuProps) => {
         ) : (
           <>
             <Link to="/login" className="block">
-              <Button variant="ghost" className="w-full">Entrar</Button>
+              <Button variant="ghost" className="w-full text-foreground">Entrar</Button>
             </Link>
             <Link to="/register" className="block">
               <Button className="w-full">Registrar</Button>

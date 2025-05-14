@@ -24,7 +24,7 @@ const DesktopNavigation = ({ onLogout }: DesktopNavigationProps) => {
       ) : (
         <>
           <Link to="/login">
-            <Button variant="ghost">Entrar</Button>
+            <Button variant="ghost" className="text-foreground">Entrar</Button>
           </Link>
           <Link to="/register">
             <Button>Registrar</Button>

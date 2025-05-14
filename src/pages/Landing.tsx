@@ -1,3 +1,4 @@
+
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
@@ -29,7 +30,7 @@ const Landing = () => {
                     <Button
                       variant="outline"
                       size="lg"
-                      className="!text-white !opacity-100 border-white hover:bg-linkeblue-700 w-full sm:w-auto"
+                      className="border-white hover:bg-linkeblue-700 w-full sm:w-auto text-white"
                     >
                       Entrar
                     </Button>
