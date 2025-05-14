@@ -1,3 +1,4 @@
+// src/hooks/useLoginForm.ts
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ProfileType } from "@/types/auth";
@@ -24,7 +25,6 @@ export const useLoginForm = () => {
       console.log("🟢 Tentando login com:", { email, profileType });
 
       const result = await login(email, password, profileType);
-
       console.log("🎯 Resultado da função login:", result);
 
       if (!result || result?.error) {
@@ -36,37 +36,24 @@ export const useLoginForm = () => {
         description: `Bem-vindo de volta, ${profileType === "importer" ? "importador" : "despachante"}.`,
       });
 
-      console.log("🚀 Redirecionando para /dashboard via window.location.href");
-      window.location.href = "/dashboard"; // Redirecionamento direto
-
-      // Fallback extra com delay para roteamento interno
-      setTimeout(() => {
-        console.log("⚠️ Executando fallback com navigate('/dashboard')");
-        navigate("/dashboard");
-      }, 800);
-
+      window.location.href = "/dashboard";
+      setTimeout(() => navigate("/dashboard"), 500);
     } catch (err: any) {
       console.error("🔴 Erro de login capturado:", err);
 
       let errorMessage = "Falha na autenticação. Verifique suas credenciais.";
-
-      if (err.message?.includes("Failed to fetch")) {
-        errorMessage = "Erro de conexão com o servidor. Tente novamente mais tarde.";
-      } else if (err.message?.includes("Invalid login credentials")) {
+      if (err.message?.includes("Invalid login credentials")) {
         errorMessage = "Credenciais inválidas. Verifique email e senha.";
       } else if (err.message?.includes("Invalid API key")) {
         errorMessage = "Erro na API. Contate o suporte técnico.";
-      } else if (err.message) {
+      } else if (err.message?.includes("Failed to fetch")) {
+        errorMessage = "Erro de conexão com o servidor. Tente novamente.";
+      } else {
         errorMessage = err.message;
       }
 
+      toast({ variant: "destructive", title: "Erro ao fazer login", description: errorMessage });
       setError(errorMessage);
-
-      toast({
-        variant: "destructive",
-        title: "Erro ao fazer login",
-        description: errorMessage,
-      });
     } finally {
       setIsLoading(false);
     }
