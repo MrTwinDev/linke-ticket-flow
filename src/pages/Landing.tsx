@@ -38,6 +38,10 @@ const Landing = () => {
                   src="https://images.unsplash.com/photo-1565017228812-8c6f067fb93e?auto=format&fit=crop&q=80&w=800&h=600"
                   alt="Contêineres de carga" 
                   className="rounded-lg shadow-xl max-w-full h-auto"
+                  onError={(e) => {
+                    // Fallback to another image if the primary one fails
+                    e.currentTarget.src = "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&q=80&w=800&h=600";
+                  }}
                 />
               </div>
             </div>
