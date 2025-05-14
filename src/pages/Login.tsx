@@ -64,7 +64,7 @@ const Login: React.FC = () => {
               <TabsTrigger value="broker">Despachante</TabsTrigger>
             </TabsList>
 
-            {/** Formulário Importador */}
+            {/* Formulário Importador */}
             <TabsContent value="importer">
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
@@ -95,7 +95,7 @@ const Login: React.FC = () => {
               </form>
             </TabsContent>
 
-            {/** Formulário Despachante */}
+            {/* Formulário Despachante */}
             <TabsContent value="broker">
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>

@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       async (event, session) => {
         console.log("🔄 Auth state changed:", event, !!session);
         
-        // Always set loading to true when auth state changes
+        // Set loading to true when auth state changes
         setIsLoading(true);
         
         if (session?.user) {
@@ -70,8 +70,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 email: session.user.email || '',
                 profileType: session.user.user_metadata.profileType || 'importer',
                 personType: session.user.user_metadata.personType || 'PF',
-                phone: '', // Add missing required property
-                documentNumber: '', // Add missing required property
+                phone: '', 
+                documentNumber: '', 
                 address: {
                   cep: '',
                   street: '',

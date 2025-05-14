@@ -24,7 +24,7 @@ export const useLoginForm = () => {
     try {
       console.log("🟢 Login attempt:", { email, profileType });
       
-      // Try the login operation
+      // Try the login operation - ensure we await the result
       const result = await login(email, password, profileType);
       
       console.log("✅ Login bem-sucedido, exibindo toast de sucesso");
@@ -34,12 +34,11 @@ export const useLoginForm = () => {
         description: `Bem-vindo de volta, ${profileType === "importer" ? "importador" : "despachante"}.`,
       });
 
-      // Reset form state after successful login
+      // Reset loading state before navigation
       setIsLoading(false);
       
       console.log("🚀 Redirecionando para /dashboard...");
-      // Use navigate here to ensure the redirection happens even if the 
-      // automatic redirect in Login.tsx useEffect doesn't trigger
+      // Force navigation here to ensure redirection happens even if useEffect doesn't trigger
       navigate("/dashboard");
     } catch (err: any) {
       console.error("🔴 Erro de login:", err);
