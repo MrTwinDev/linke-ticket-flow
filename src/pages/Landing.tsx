@@ -1,4 +1,3 @@
-
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/Header";
@@ -27,7 +26,12 @@ const Landing = () => {
                     </Button>
                   </Link>
                   <Link to="/login">
-                    <Button variant="outline" size="lg" className="text-white border-white hover:bg-linkeblue-700 w-full sm:w-auto">
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      className="text-white border-white hover:bg-linkeblue-700 w-full sm:w-auto"
+                      disabled={false}
+                    >
                       Entrar
                     </Button>
                   </Link>
@@ -39,7 +43,6 @@ const Landing = () => {
                   alt="Contêineres de carga" 
                   className="rounded-lg shadow-xl max-w-full h-auto"
                   onError={(e) => {
-                    // Fallback to another image if the primary one fails
                     e.currentTarget.src = "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&q=80&w=800&h=600";
                   }}
                 />
@@ -106,7 +109,7 @@ const Landing = () => {
               Junte-se ao LinkeImport hoje e experimente uma forma mais eficiente de colaborar com despachantes aduaneiros.
             </p>
             <Link to="/register">
-              <Button size="lg" className="bg-linkeblue-600 hover:bg-linkeblue-700">
+              <Button size="lg" className="bg-linkeblue-600 hover:bg-linkeblue-700 text-white">
                 Começar Agora
               </Button>
             </Link>
