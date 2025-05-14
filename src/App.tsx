@@ -1,9 +1,14 @@
+// src/App.tsx
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { AuthProvider, useAuth } from "./providers/AuthProvider";
+
+import { AuthProvider } from "./providers/AuthProvider";   // ✅ exporta apenas AuthProvider
+import { useAuth } from "@/hooks/useAuth";                 // ✅ useAuth vem de outro arquivo
+
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -16,25 +21,10 @@ import ProfilePage from "./pages/ProfilePage";
 import Support from "./pages/Support";
 import NotFound from "./pages/NotFound";
 
-// Import Supabase auth storage initialization
+// Importa Supabase Storage fix
 import "@/integrations/supabase/storage-init";
 
 const queryClient = new QueryClient();
-
-function RequireAuth({ children }: { children: JSX.Element }) {
-  const { isAuthenticated, isLoading } = useAuth();
-
-  if (isLoading) {
-    return <div className="p-8 text-center">Carregando...</div>;
-  }
-
-  if (!isAuthenticated) {
-    console.warn("🔒 Usuário não autenticado. Redirecionando para /login");
-    return <Navigate to="/login" replace />;
-  }
-
-  return children;
-}
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -48,15 +38,8 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
 
-            {/* Protected dashboard area */}
-            <Route
-              path="/dashboard"
-              element={
-                <RequireAuth>
-                  <DashboardLayout />
-                </RequireAuth>
-              }
-            >
+            {/* Rotas protegidas dentro do layout */}
+            <Route path="/dashboard" element={<DashboardLayout />}>
               <Route index element={<Dashboard />} />
               <Route path="tickets" element={<Tickets />} />
               <Route path="tickets/:id" element={<TicketDetail />} />
@@ -65,6 +48,7 @@ const App = () => (
               <Route path="support" element={<Support />} />
             </Route>
 
+            {/* Página de erro 404 */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
@@ -74,4 +58,3 @@ const App = () => (
 );
 
 export default App;
-
