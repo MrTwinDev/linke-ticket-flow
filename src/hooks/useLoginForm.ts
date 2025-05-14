@@ -27,7 +27,7 @@ export const useLoginForm = () => {
       // Try the login operation
       const result = await login(email, password, profileType);
       
-      console.log("✅ Login successful, showing success toast");
+      console.log("✅ Login bem-sucedido, exibindo toast de sucesso");
 
       toast({
         title: "Login bem-sucedido",
@@ -37,12 +37,12 @@ export const useLoginForm = () => {
       // Reset form state after successful login
       setIsLoading(false);
       
-      console.log("🚀 Redirecting to /dashboard...");
+      console.log("🚀 Redirecionando para /dashboard...");
       // Use navigate here to ensure the redirection happens even if the 
       // automatic redirect in Login.tsx useEffect doesn't trigger
       navigate("/dashboard");
     } catch (err: any) {
-      console.error("🔴 Login error:", err);
+      console.error("🔴 Erro de login:", err);
       
       // Provide more specific error messages
       let errorMessage = "Falha na autenticação. Verifique suas credenciais.";
