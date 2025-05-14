@@ -40,8 +40,8 @@ const Tickets = () => {
       const mockTickets: Ticket[] = [
         {
           id: "1",
-          title: "Import clearance for machinery parts",
-          description: "Need customs clearance for industrial machinery parts arriving from Germany.",
+          title: "Desembaraço de peças de maquinário",
+          description: "Necessidade de desembaraço aduaneiro para peças de máquinas industriais da Alemanha.",
           status: "open",
           createdAt: "2025-04-30T10:30:00",
           updatedAt: "2025-04-30T10:30:00",
@@ -51,15 +51,15 @@ const Tickets = () => {
           },
           importer: {
             id: "i1",
-            name: "Import Company Ltd"
+            name: "Empresa Importadora Ltda"
           },
           messages: 3,
           pendingEditApproval: false
         },
         {
           id: "2",
-          title: "Documentation for textile shipment",
-          description: "Requesting assistance with import documentation for textile goods from China.",
+          title: "Documentação para envio de têxteis",
+          description: "Solicitando assistência com documentação de importação para produtos têxteis da China.",
           status: "in_progress",
           createdAt: "2025-04-28T14:20:00",
           updatedAt: "2025-04-29T09:45:00",
@@ -69,15 +69,15 @@ const Tickets = () => {
           },
           importer: {
             id: "i1",
-            name: "Import Company Ltd"
+            name: "Empresa Importadora Ltda"
           },
           messages: 8,
           pendingEditApproval: true
         },
         {
           id: "3",
-          title: "Customs clearance for electronics",
-          description: "Need help with customs clearance for a shipment of smartphones and accessories.",
+          title: "Desembaraço aduaneiro para eletrônicos",
+          description: "Preciso de ajuda com desembaraço aduaneiro para uma remessa de smartphones e acessórios.",
           status: "completed",
           createdAt: "2025-04-25T09:15:00",
           updatedAt: "2025-04-27T11:20:00",
@@ -87,15 +87,15 @@ const Tickets = () => {
           },
           importer: {
             id: "i1",
-            name: "Import Company Ltd"
+            name: "Empresa Importadora Ltda"
           },
           messages: 12,
           pendingEditApproval: false
         },
         {
           id: "4",
-          title: "Duty calculation for auto parts",
-          description: "Need assistance calculating import duties for automotive spare parts.",
+          title: "Cálculo de impostos para peças automotivas",
+          description: "Preciso de assistência para calcular impostos de importação para peças automotivas.",
           status: "cancelled",
           createdAt: "2025-04-23T16:10:00",
           updatedAt: "2025-04-24T10:30:00",
@@ -105,15 +105,15 @@ const Tickets = () => {
           },
           importer: {
             id: "i1",
-            name: "Import Company Ltd"
+            name: "Empresa Importadora Ltda"
           },
           messages: 2,
           pendingEditApproval: false
         },
         {
           id: "5",
-          title: "Emergency clearance for medical supplies",
-          description: "Need expedited customs clearance for medical supplies shipment.",
+          title: "Liberação emergencial para suprimentos médicos",
+          description: "Necessidade de desembaraço aduaneiro acelerado para remessa de suprimentos médicos.",
           status: "open",
           createdAt: "2025-04-22T08:05:00",
           updatedAt: "2025-04-22T08:05:00",
@@ -123,7 +123,7 @@ const Tickets = () => {
           },
           importer: {
             id: "i1",
-            name: "Import Company Ltd"
+            name: "Empresa Importadora Ltda"
           },
           messages: 5,
           pendingEditApproval: false
@@ -176,8 +176,14 @@ const Tickets = () => {
   // Helper function to format status text
   const formatStatus = (status: string) => {
     switch (status) {
+      case "open":
+        return "Aberto";
       case "in_progress":
-        return "In Progress";
+        return "Em Andamento";
+      case "completed":
+        return "Concluído";
+      case "cancelled":
+        return "Cancelado";
       default:
         return status.charAt(0).toUpperCase() + status.slice(1);
     }
@@ -186,9 +192,9 @@ const Tickets = () => {
   // Format date
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
+    return date.toLocaleDateString("pt-BR", {
       year: "numeric",
-      month: "short",
+      month: "long",
       day: "numeric",
     });
   };
@@ -199,13 +205,13 @@ const Tickets = () => {
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Tickets</h1>
           <p className="text-gray-600">
-            Manage your {profileType === "importer" ? "import" : "client"} tickets
+            Gerencie seus tickets {profileType === "importer" ? "de importação" : "de clientes"}
           </p>
         </div>
 
         {profileType === "importer" && (
           <Link to="/dashboard/tickets/create">
-            <Button>Create New Ticket</Button>
+            <Button>Criar Novo Ticket</Button>
           </Link>
         )}
       </div>
@@ -216,7 +222,7 @@ const Tickets = () => {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
           <Input
             type="text"
-            placeholder="Search tickets..."
+            placeholder="Buscar tickets..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
@@ -228,14 +234,14 @@ const Tickets = () => {
             onValueChange={setStatusFilter}
           >
             <SelectTrigger>
-              <SelectValue placeholder="All Statuses" />
+              <SelectValue placeholder="Todos os Status" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Statuses</SelectItem>
-              <SelectItem value="open">Open</SelectItem>
-              <SelectItem value="in_progress">In Progress</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-              <SelectItem value="cancelled">Cancelled</SelectItem>
+              <SelectItem value="all">Todos os Status</SelectItem>
+              <SelectItem value="open">Aberto</SelectItem>
+              <SelectItem value="in_progress">Em Andamento</SelectItem>
+              <SelectItem value="completed">Concluído</SelectItem>
+              <SelectItem value="cancelled">Cancelado</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -247,14 +253,14 @@ const Tickets = () => {
           <table className="w-full">
             <thead className="text-xs uppercase text-gray-500 bg-gray-50 rounded-t-lg">
               <tr>
-                <th className="px-4 py-3 text-left">Title</th>
+                <th className="px-4 py-3 text-left">Título</th>
                 <th className="px-4 py-3 text-left">Status</th>
-                <th className="px-4 py-3 text-left">Created</th>
+                <th className="px-4 py-3 text-left">Criado</th>
                 <th className="px-4 py-3 text-left">
-                  {profileType === "importer" ? "Broker" : "Importer"}
+                  {profileType === "importer" ? "Despachante" : "Importador"}
                 </th>
-                <th className="px-4 py-3 text-center">Messages</th>
-                <th className="px-4 py-3 text-right">Action</th>
+                <th className="px-4 py-3 text-center">Mensagens</th>
+                <th className="px-4 py-3 text-right">Ação</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -264,17 +270,17 @@ const Tickets = () => {
                     <div className="flex justify-center">
                       <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-linkeblue-600"></div>
                     </div>
-                    <p className="mt-2 text-sm text-gray-500">Loading tickets...</p>
+                    <p className="mt-2 text-sm text-gray-500">Carregando tickets...</p>
                   </td>
                 </tr>
               ) : filteredTickets.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-4 py-8 text-center">
-                    <p className="text-gray-500">No tickets found.</p>
+                    <p className="text-gray-500">Nenhum ticket encontrado.</p>
                     {profileType === "importer" && (
                       <Link to="/dashboard/tickets/create" className="mt-2 inline-block">
                         <Button variant="outline" size="sm">
-                          Create your first ticket
+                          Crie seu primeiro ticket
                         </Button>
                       </Link>
                     )}
@@ -291,7 +297,7 @@ const Tickets = () => {
                         </p>
                         {ticket.pendingEditApproval && (
                           <span className="inline-flex items-center px-2 py-0.5 mt-1 rounded text-xs font-medium bg-yellow-100 text-yellow-800">
-                            Pending edit approval
+                            Aprovação de edição pendente
                           </span>
                         )}
                       </div>
@@ -315,7 +321,7 @@ const Tickets = () => {
                     <td className="px-4 py-4 text-right">
                       <Link to={`/dashboard/tickets/${ticket.id}`}>
                         <Button variant="outline" size="sm">
-                          View
+                          Visualizar
                         </Button>
                       </Link>
                     </td>
