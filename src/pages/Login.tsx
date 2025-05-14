@@ -19,11 +19,17 @@ const Login = () => {
     handleSubmit,
   } = useLoginForm();
 
-  const { isAuthenticated, isLoading: authLoading, profileType: ctxProfile } = useAuth();
+  const {
+    isAuthenticated,
+    isLoading: authLoading,
+    profileType: ctxProfile,
+  } = useAuth();
+
   const navigate = useNavigate();
 
   useEffect(() => {
     if (!authLoading && isAuthenticated) {
+      console.log("✅ Já autenticado, redirecionando...");
       navigate("/dashboard");
     }
   }, [isAuthenticated, authLoading, ctxProfile, navigate]);
@@ -34,8 +40,9 @@ const Login = () => {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <Label>Email</Label>
+          <Label htmlFor="email">Email</Label>
           <Input
+            id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -44,8 +51,9 @@ const Login = () => {
         </div>
 
         <div>
-          <Label>Senha</Label>
+          <Label htmlFor="password">Senha</Label>
           <Input
+            id="password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
@@ -54,8 +62,9 @@ const Login = () => {
         </div>
 
         <div>
-          <Label>Tipo de Usuário</Label>
+          <Label htmlFor="profileType">Tipo de Usuário</Label>
           <select
+            id="profileType"
             className="w-full border rounded p-2"
             value={profileType}
             onChange={(e) => setProfileType(e.target.value as any)}
