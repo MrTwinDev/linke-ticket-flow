@@ -27,12 +27,13 @@ const Landing = () => {
                   </Link>
                   <Link to="/login">
                     <Button
-                      variant="outline"
-                      size="lg"
-                      className="text-white border-white hover:bg-linkeblue-700 w-full sm:w-auto !opacity-100 !text-white"
-                    >
-                      Entrar
-                    </Button>
+  variant="outline"
+  size="lg"
+  className="!text-white !opacity-100 border-white hover:bg-linkeblue-700 w-full sm:w-auto"
+>
+  Entrar
+</Button>
+
                   </Link>
                 </div>
               </div>
