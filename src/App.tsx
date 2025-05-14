@@ -1,94 +1,56 @@
-import { useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { useLoginForm } from "@/hooks/useLoginForm";
-import { useAuth } from "@/hooks/useAuth";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+// src/App.tsx
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { AuthProvider } from "@/providers/AuthProvider"; // 🔒 Certifique-se que este está certo!
+import Landing from "@/pages/Landing";
+import Login from "@/pages/Login";
+import Register from "@/pages/Register";
+import DashboardLayout from "@/layouts/DashboardLayout";
+import Dashboard from "@/pages/Dashboard";
+import Tickets from "@/pages/Tickets";
+import TicketDetail from "@/pages/TicketDetail";
+import CreateTicket from "@/pages/CreateTicket";
+import ProfilePage from "@/pages/ProfilePage";
+import Support from "@/pages/Support";
+import NotFound from "@/pages/NotFound";
 
-const Login = () => {
-  const {
-    email,
-    setEmail,
-    password,
-    setPassword,
-    profileType,
-    setProfileType,
-    isLoading,
-    error,
-    handleSubmit,
-  } = useLoginForm();
+// Supabase storage config
+import "@/integrations/supabase/storage-init";
 
-  const {
-    isAuthenticated,
-    isLoading: authLoading,
-    profileType: ctxProfile,
-  } = useAuth();
+const queryClient = new QueryClient();
 
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (!authLoading && isAuthenticated) {
-      console.log("✅ Autenticado com sucesso, redirecionando para /dashboard");
-
-      // Primeiro tenta com React Router
-      navigate("/dashboard");
-
-      // Fallback garantido
-      setTimeout(() => {
-        window.location.href = "/dashboard";
-      }, 200);
-    }
-  }, [isAuthenticated, authLoading, ctxProfile, navigate]);
-
+const App = () => {
   return (
-    <div className="max-w-md mx-auto mt-20 p-6 bg-white rounded shadow">
-      <h1 className="text-2xl font-bold mb-4">Entrar</h1>
+    <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+        <AuthProvider> {/* ✅ Esse cara precisa englobar tudo! */}
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Landing />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-          />
-        </div>
+              <Route path="/dashboard" element={<DashboardLayout />}>
+                <Route index element={<Dashboard />} />
+                <Route path="tickets" element={<Tickets />} />
+                <Route path="tickets/:id" element={<TicketDetail />} />
+                <Route path="tickets/create" element={<CreateTicket />} />
+                <Route path="profile" element={<ProfilePage />} />
+                <Route path="support" element={<Support />} />
+              </Route>
 
-        <div>
-          <Label htmlFor="password">Senha</Label>
-          <Input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
-        </div>
-
-        <div>
-          <Label htmlFor="profileType">Tipo de Usuário</Label>
-          <select
-            id="profileType"
-            className="w-full border rounded p-2"
-            value={profileType}
-            onChange={(e) => setProfileType(e.target.value as any)}
-          >
-            <option value="importer">Importador</option>
-            <option value="agent">Despachante</option>
-          </select>
-        </div>
-
-        {error && <p className="text-red-500 text-sm">{error}</p>}
-
-        <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? "Entrando..." : "Entrar"}
-        </Button>
-      </form>
-    </div>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </AuthProvider>
+      </TooltipProvider>
+    </QueryClientProvider>
   );
 };
 
-export default Login;
+export default App;
