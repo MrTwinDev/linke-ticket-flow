@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { ProfileType, User } from "@/types/auth";
 import React from "react";
@@ -85,7 +84,7 @@ export const useAuthOperations = ({
     }
   };
 
-  const logout = async (): Promise<void> => { // Changed return type to void
+  const logout = async (): Promise<void> => {
     try {
       console.log("[auth] Logging out user");
       const { error } = await supabase.auth.signOut();

@@ -35,12 +35,7 @@ const Login: React.FC = () => {
     // Only redirect if we know the user is authenticated and we're not currently loading
     if (!authLoading && isAuthenticated) {
       console.log("🚀 User authenticated → redirecting to /dashboard");
-      // Use a short timeout to ensure the state is stable before redirecting
-      const redirectTimeout = setTimeout(() => {
-        navigate("/dashboard");
-      }, 100);
-      
-      return () => clearTimeout(redirectTimeout);
+      navigate("/dashboard");
     }
   }, [authLoading, isAuthenticated, navigate]);
 

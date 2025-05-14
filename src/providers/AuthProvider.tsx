@@ -126,10 +126,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             }
 
             console.log("✅ User profile loaded", { profileType: profile.profile_type });
+            
+            // Update all state variables at once to prevent UI inconsistencies
             setCurrentUser(user);
             setProfileType(profile.profile_type as ProfileType);
             setIsAuthenticated(true);
             setIsLoading(false);
+            
           } catch (err) {
             console.error('🔴 Error in auth state change handler:', err);
             setCurrentUser(null);
