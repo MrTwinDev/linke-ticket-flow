@@ -6,7 +6,6 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { AuthProvider } from "@/providers/AuthProvider";
 
-// Pages
 import Landing from "@/pages/Landing";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
@@ -19,7 +18,6 @@ import ProfilePage from "@/pages/ProfilePage";
 import Support from "@/pages/Support";
 import NotFound from "@/pages/NotFound";
 
-// Supabase setup
 import "@/integrations/supabase/storage-init";
 
 const queryClient = new QueryClient();
