@@ -10,7 +10,7 @@ export const useLoginForm = () => {
   const [profileType, setProfileType] = useState<ProfileType>("importer");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
+
   const { login } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -22,53 +22,43 @@ export const useLoginForm = () => {
 
     try {
       console.log("🟢 Login attempt:", { email, profileType });
-      
-      // Try the login operation - ensure we await the result
+
       const result = await login(email, password, profileType);
-      
-      console.log("✅ Login bem-sucedido, exibindo toast de sucesso");
+
+      if (result?.error) {
+        throw new Error(result.error.message);
+      }
 
       toast({
         title: "Login bem-sucedido",
         description: `Bem-vindo de volta, ${profileType === "importer" ? "importador" : "despachante"}.`,
       });
 
-      // Force navigation here immediately after successful login 
-      // instead of waiting for the useEffect in Login.tsx
-      console.log("🚀 Forcing navigation to /dashboard");
-      window.location.href = "/dashboard";
-      
-      // If window.location.href navigation doesn't execute for some reason,
-      // keep the React Router navigation as fallback
-      setTimeout(() => {
-        setIsLoading(false);
-        navigate("/dashboard");
-      }, 100);
-      
+      console.log("🚀 Navegando para /dashboard");
+      navigate("/dashboard");
     } catch (err: any) {
       console.error("🔴 Erro de login:", err);
-      
-      // Provide more specific error messages
+
       let errorMessage = "Falha na autenticação. Verifique suas credenciais.";
-      
-      if (err.message === "Failed to fetch" || err.message?.includes("fetch")) {
+
+      if (err.message?.includes("Failed to fetch")) {
         errorMessage = "Erro de conexão com o servidor. Tente novamente mais tarde.";
       } else if (err.message?.includes("Invalid login credentials")) {
         errorMessage = "Credenciais inválidas. Por favor, verifique seu email e senha.";
       } else if (err.message?.includes("Invalid API key")) {
-        errorMessage = "Problema na configuração da API. Por favor, contacte o suporte técnico.";
+        errorMessage = "Problema na configuração da API. Contate o suporte técnico.";
       } else if (err.message) {
         errorMessage = err.message;
       }
-      
+
       setError(errorMessage);
-      setIsLoading(false);
-      
       toast({
         variant: "destructive",
         title: "Erro ao fazer login",
         description: errorMessage,
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -81,6 +71,6 @@ export const useLoginForm = () => {
     setProfileType,
     isLoading,
     error,
-    handleSubmit
+    handleSubmit,
   };
 };
