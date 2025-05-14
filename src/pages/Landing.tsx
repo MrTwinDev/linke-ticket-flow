@@ -6,7 +6,7 @@ const Landing = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-
+      
       <main className="flex-grow">
         {/* Hero Section */}
         <section className="bg-gradient-to-r from-linkeblue-800 to-linkeblue-600 py-16 md:py-24">
@@ -32,26 +32,25 @@ const Landing = () => {
                       className="!text-white !opacity-100 border-white hover:bg-linkeblue-700 w-full sm:w-auto"
                     >
                       Entrar
-                  </Button>
-
+                    </Button>
                   </Link>
                 </div>
               </div>
               <div className="md:w-1/2 flex justify-center md:justify-end">
-                <img
+                <img 
                   src="https://images.unsplash.com/photo-1565017228812-8c6f067fb93e?auto=format&fit=crop&q=80&w=800&h=600"
-                  alt="Contêineres de carga"
+                  alt="Contêineres de carga" 
                   className="rounded-lg shadow-xl max-w-full h-auto"
                   onError={(e) => {
-                    e.currentTarget.src =
-                      "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&q=80&w=800&h=600";
+                    e.currentTarget.onerror = null;
+                    e.currentTarget.src = "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&q=80&w=800&h=600";
                   }}
                 />
               </div>
             </div>
           </div>
         </section>
-
+        
         {/* Features Section */}
         <section className="py-16">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -61,7 +60,7 @@ const Landing = () => {
                 LinkeImport oferece um conjunto abrangente de ferramentas para melhorar a colaboração entre importadores e despachantes aduaneiros.
               </p>
             </div>
-
+            
             <div className="grid md:grid-cols-3 gap-8">
               <div className="bg-white p-6 rounded-lg shadow-md">
                 <div className="h-12 w-12 bg-linkeblue-100 text-linkeblue-600 rounded-lg flex items-center justify-center mb-4">
@@ -74,7 +73,7 @@ const Landing = () => {
                   Crie e acompanhe solicitações de importação com um sistema de tickets dedicado para comércio internacional.
                 </p>
               </div>
-
+              
               <div className="bg-white p-6 rounded-lg shadow-md">
                 <div className="h-12 w-12 bg-linkeblue-100 text-linkeblue-600 rounded-lg flex items-center justify-center mb-4">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -86,7 +85,7 @@ const Landing = () => {
                   Comunique-se diretamente com seu despachante aduaneiro através de um sistema de chat dedicado para cada ticket.
                 </p>
               </div>
-
+              
               <div className="bg-white p-6 rounded-lg shadow-md">
                 <div className="h-12 w-12 bg-linkeblue-100 text-linkeblue-600 rounded-lg flex items-center justify-center mb-4">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -101,7 +100,7 @@ const Landing = () => {
             </div>
           </div>
         </section>
-
+        
         {/* CTA Section */}
         <section className="bg-linkeblue-50 py-16">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -117,7 +116,7 @@ const Landing = () => {
           </div>
         </section>
       </main>
-
+      
       <footer className="bg-white border-t border-gray-200 py-8">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:justify-between items-center">
