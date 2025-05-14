@@ -36,13 +36,14 @@ export const useLoginForm = () => {
         description: `Bem-vindo de volta, ${profileType === "importer" ? "importador" : "despachante"}.`,
       });
 
-      console.log("🚀 Redirecionando para /dashboard");
-      window.location.href = "/dashboard"; // Fallback direto
+      console.log("🚀 Redirecionando para /dashboard via window.location.href");
+      window.location.href = "/dashboard"; // Redirecionamento direto
 
-      // Fallback adicional em caso de falha silenciosa
+      // Fallback extra com delay para roteamento interno
       setTimeout(() => {
+        console.log("⚠️ Executando fallback com navigate('/dashboard')");
         navigate("/dashboard");
-      }, 500);
+      }, 800);
 
     } catch (err: any) {
       console.error("🔴 Erro de login capturado:", err);
