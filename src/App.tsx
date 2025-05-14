@@ -1,60 +1,94 @@
-// src/App.tsx
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { useLoginForm } from "@/hooks/useLoginForm";
+import { useAuth } from "@/hooks/useAuth";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+const Login = () => {
+  const {
+    email,
+    setEmail,
+    password,
+    setPassword,
+    profileType,
+    setProfileType,
+    isLoading,
+    error,
+    handleSubmit,
+  } = useLoginForm();
 
-import { AuthProvider } from "./providers/AuthProvider";   // ✅ exporta apenas AuthProvider
-import { useAuth } from "@/hooks/useAuth";                 // ✅ useAuth vem de outro arquivo
+  const {
+    isAuthenticated,
+    isLoading: authLoading,
+    profileType: ctxProfile,
+  } = useAuth();
 
-import Landing from "./pages/Landing";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import DashboardLayout from "./layouts/DashboardLayout";
-import Dashboard from "./pages/Dashboard";
-import Tickets from "./pages/Tickets";
-import TicketDetail from "./pages/TicketDetail";
-import CreateTicket from "./pages/CreateTicket";
-import ProfilePage from "./pages/ProfilePage";
-import Support from "./pages/Support";
-import NotFound from "./pages/NotFound";
+  const navigate = useNavigate();
 
-// Importa Supabase Storage fix
-import "@/integrations/supabase/storage-init";
+  useEffect(() => {
+    if (!authLoading && isAuthenticated) {
+      console.log("✅ Autenticado com sucesso, redirecionando para /dashboard");
 
-const queryClient = new QueryClient();
+      // Primeiro tenta com React Router
+      navigate("/dashboard");
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <AuthProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Landing />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+      // Fallback garantido
+      setTimeout(() => {
+        window.location.href = "/dashboard";
+      }, 200);
+    }
+  }, [isAuthenticated, authLoading, ctxProfile, navigate]);
 
-            {/* Rotas protegidas dentro do layout */}
-            <Route path="/dashboard" element={<DashboardLayout />}>
-              <Route index element={<Dashboard />} />
-              <Route path="tickets" element={<Tickets />} />
-              <Route path="tickets/:id" element={<TicketDetail />} />
-              <Route path="tickets/create" element={<CreateTicket />} />
-              <Route path="profile" element={<ProfilePage />} />
-              <Route path="support" element={<Support />} />
-            </Route>
+  return (
+    <div className="max-w-md mx-auto mt-20 p-6 bg-white rounded shadow">
+      <h1 className="text-2xl font-bold mb-4">Entrar</h1>
 
-            {/* Página de erro 404 */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </AuthProvider>
-  </QueryClientProvider>
-);
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <Label htmlFor="email">Email</Label>
+          <Input
+            id="email"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </div>
 
-export default App;
+        <div>
+          <Label htmlFor="password">Senha</Label>
+          <Input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+          />
+        </div>
+
+        <div>
+          <Label htmlFor="profileType">Tipo de Usuário</Label>
+          <select
+            id="profileType"
+            className="w-full border rounded p-2"
+            value={profileType}
+            onChange={(e) => setProfileType(e.target.value as any)}
+          >
+            <option value="importer">Importador</option>
+            <option value="agent">Despachante</option>
+          </select>
+        </div>
+
+        {error && <p className="text-red-500 text-sm">{error}</p>}
+
+        <Button type="submit" className="w-full" disabled={isLoading}>
+          {isLoading ? "Entrando..." : "Entrar"}
+        </Button>
+      </form>
+    </div>
+  );
+};
+
+export default Login;
