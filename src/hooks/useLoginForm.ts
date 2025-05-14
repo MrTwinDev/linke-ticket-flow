@@ -21,12 +21,14 @@ export const useLoginForm = () => {
     setIsLoading(true);
 
     try {
-      console.log("🟢 Login attempt:", { email, profileType });
+      console.log("🟢 Tentando login com:", { email, profileType });
 
       const result = await login(email, password, profileType);
 
-      if (result?.error) {
-        throw new Error(result.error.message);
+      console.log("🎯 Resultado da função login:", result);
+
+      if (!result || result?.error) {
+        throw new Error(result?.error?.message || "Falha no login.");
       }
 
       toast({
@@ -34,24 +36,31 @@ export const useLoginForm = () => {
         description: `Bem-vindo de volta, ${profileType === "importer" ? "importador" : "despachante"}.`,
       });
 
-      console.log("🚀 Navegando para /dashboard");
-      navigate("/dashboard");
+      console.log("🚀 Redirecionando para /dashboard");
+      window.location.href = "/dashboard"; // Fallback direto
+
+      // Fallback adicional em caso de falha silenciosa
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 500);
+
     } catch (err: any) {
-      console.error("🔴 Erro de login:", err);
+      console.error("🔴 Erro de login capturado:", err);
 
       let errorMessage = "Falha na autenticação. Verifique suas credenciais.";
 
       if (err.message?.includes("Failed to fetch")) {
         errorMessage = "Erro de conexão com o servidor. Tente novamente mais tarde.";
       } else if (err.message?.includes("Invalid login credentials")) {
-        errorMessage = "Credenciais inválidas. Por favor, verifique seu email e senha.";
+        errorMessage = "Credenciais inválidas. Verifique email e senha.";
       } else if (err.message?.includes("Invalid API key")) {
-        errorMessage = "Problema na configuração da API. Contate o suporte técnico.";
+        errorMessage = "Erro na API. Contate o suporte técnico.";
       } else if (err.message) {
         errorMessage = err.message;
       }
 
       setError(errorMessage);
+
       toast({
         variant: "destructive",
         title: "Erro ao fazer login",
