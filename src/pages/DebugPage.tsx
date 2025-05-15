@@ -1,4 +1,3 @@
-// src/pages/DebugPage.tsx
 import React, { useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
