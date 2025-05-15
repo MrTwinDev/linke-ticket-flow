@@ -1,4 +1,4 @@
-
+// src/App.tsx
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -18,6 +18,9 @@ import ProfilePage from "./pages/ProfilePage";
 import Support from "./pages/Support";
 import NotFound from "./pages/NotFound";
 
+// 🔍 Página de diagnóstico
+import DebugPage from "./pages/DebugPage";
+
 // Import storage initialization
 import "@/integrations/supabase/storage-init";
 
@@ -34,7 +37,8 @@ const App = () => (
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            
+            <Route path="/debug" element={<DebugPage />} /> {/* ✅ Adicionada */}
+
             {/* Dashboard and nested routes */}
             <Route path="/dashboard" element={<DashboardLayout />}>
               <Route index element={<Dashboard />} />
@@ -44,7 +48,7 @@ const App = () => (
               <Route path="profile" element={<ProfilePage />} />
               <Route path="support" element={<Support />} />
             </Route>
-            
+
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
