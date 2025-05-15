@@ -1,4 +1,3 @@
-
 // src/pages/Login.tsx
 import React, { useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -28,21 +27,26 @@ const Login: React.FC = () => {
   const { isAuthenticated, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
 
-  // Redirect after authentication - improved to handle edge cases
+  // Aguarda autenticação finalizar antes de decidir redirecionar
   useEffect(() => {
     console.log("Login.tsx • auth state:", { isAuthenticated, authLoading });
-    
-    // Only redirect if we know the user is authenticated and we're not currently loading
-    if (!authLoading && isAuthenticated) {
-      console.log("🚀 User authenticated → redirecting to /dashboard");
-      // Use a short timeout to ensure the state is stable before redirecting
-      const redirectTimeout = setTimeout(() => {
-        navigate("/dashboard");
-      }, 100);
-      
-      return () => clearTimeout(redirectTimeout);
+
+    if (authLoading) return;
+
+    if (isAuthenticated) {
+      console.log("🚀 Redirecionando para /dashboard");
+      navigate("/dashboard");
     }
   }, [authLoading, isAuthenticated, navigate]);
+
+  // Enquanto estiver carregando a sessão, mostra tela de espera
+  if (authLoading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <p className="text-gray-500 text-lg">Carregando...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
