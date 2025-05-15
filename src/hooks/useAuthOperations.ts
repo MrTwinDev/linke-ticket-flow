@@ -7,7 +7,7 @@ export const useAuthOperations = ({
   setProfileType,
   setIsAuthenticated,
   setIsLoading,
-  toast
+  toast,
 }: {
   setCurrentUser: React.Dispatch<React.SetStateAction<User | null>>;
   setProfileType: React.Dispatch<React.SetStateAction<ProfileType | null>>;
@@ -17,9 +17,20 @@ export const useAuthOperations = ({
 }) => {
   const register = async (data: any) => {
     try {
-      const { email, password, profileType, personType, fullName, companyName, phone, documentNumber, responsibleName, responsibleCpf, address } = data;
-      
-      // Sign up the user
+      const {
+        email,
+        password,
+        profileType,
+        personType,
+        fullName,
+        companyName,
+        phone,
+        documentNumber,
+        responsibleName,
+        responsibleCpf,
+        address,
+      } = data;
+
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
@@ -38,18 +49,10 @@ export const useAuthOperations = ({
         },
       });
 
-      if (authError) {
-        throw authError;
-      }
+      if (authError) throw authError;
+      if (!authData.user?.id) throw new Error("Falha ao criar conta.");
 
-      if (!authData.user?.id) {
-        throw new Error("Failed to create user account");
-      }
-
-      console.log("🟢 User registered successfully:", authData.user.id);
-
-      // Create profile entry (this might be handled automatically by a trigger)
-      const { error: profileError } = await supabase.from('profiles').insert([
+      const { error: profileError } = await supabase.from("profiles").insert([
         {
           id: authData.user.id,
           email,
@@ -71,39 +74,29 @@ export const useAuthOperations = ({
         },
       ]);
 
-      if (profileError) {
-        console.error("🔴 Error creating profile:", profileError);
-        throw profileError;
-      }
-
-      console.log("✅ Profile created successfully");
+      if (profileError) throw profileError;
       return authData;
     } catch (error: any) {
-      console.error("🚀 ~ file: useAuthOperations.ts ~ register ~ error:", error);
+      console.error("🔴 Erro no registro:", error);
       throw error;
     }
   };
 
   const logout = async (): Promise<void> => {
     try {
-      console.log("[auth] Logging out user");
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
-      
-      // Update state
       setCurrentUser(null);
       setProfileType(null);
       setIsAuthenticated(false);
-      
       toast({
-        title: "Logout bem-sucedido",
-        description: "Você foi desconectado com segurança.",
+        title: "Logout realizado",
+        description: "Você saiu com segurança.",
       });
     } catch (error: any) {
-      console.error('[auth] Logout error:', error);
       toast({
         variant: "destructive",
-        title: "Erro ao fazer logout",
+        title: "Erro ao sair",
         description: error.message || "Tente novamente mais tarde.",
       });
       throw error;
@@ -112,74 +105,34 @@ export const useAuthOperations = ({
 
   const login = async (email: string, password: string, profileType: ProfileType) => {
     try {
-      console.log(`[auth] Logging in as ${email} with profile type ${profileType}`);
-      
-      // Make sure we are explicitly awaiting the result here
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      console.log(`[auth] Login: ${email} | Tipo: ${profileType}`);
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-      // Handle login errors immediately
-      if (error) {
-        console.error('[auth] Login error:', error);
-        throw error;
+      if (error) throw new Error("Credenciais inválidas.");
+
+      if (!data?.user?.id) throw new Error("Usuário não encontrado.");
+
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("deleted, profile_type")
+        .eq("id", data.user.id)
+        .maybeSingle();
+
+      if (profileError) console.warn("⚠️ Falha ao buscar perfil:", profileError);
+
+      if (profile?.deleted === true) {
+        await supabase.auth.signOut();
+        throw new Error("Conta desativada. Contate o suporte.");
       }
 
-      // Verify we have a valid user
-      if (!data || !data.user) {
-        console.error('[auth] No user returned from login');
-        throw new Error("Falha na autenticação. Usuário não encontrado.");
+      if (profile?.profile_type && profile.profile_type !== profileType) {
+        await supabase.auth.signOut();
+        throw new Error(`Acesso negado: esta conta não é do tipo ${profileType}.`);
       }
 
-      console.log('[auth] Login successful, checking profile');
-
-      try {
-        // Check profile - use a timeout to avoid potential auth state race conditions
-        const { data: profile, error: profileError } = await supabase
-          .from('profiles')
-          .select('deleted, profile_type')
-          .eq('id', data.user.id)
-          .maybeSingle();
-
-        if (profileError) {
-          console.error('[auth] Error fetching profile:', profileError);
-          // Log but don't throw here to avoid blocking login
-        }
-        
-        // If account is deleted, block login
-        if (profile?.deleted === true) {
-          console.warn('[auth] Attempting to access deleted account');
-          await supabase.auth.signOut();
-          throw new Error("Conta desativada. Entre em contato com o suporte para reativação.");
-        }
-        
-        // Check profile type if we got valid profile data (but don't block if profile is missing)
-        if (profile?.profile_type && profile.profile_type !== profileType) {
-          console.warn(`[auth] Profile type mismatch: Expected ${profileType}, got ${profile.profile_type}`);
-          await supabase.auth.signOut();
-          throw new Error(`Acesso negado. Essa conta não é do tipo ${profileType}.`);
-        }
-
-        // Even if profile check has issues, we should still allow login
-        console.log('[auth] Login and profile checks completed successfully');
-        
-        // Return session data for further processing
-        return data;
-      } catch (profileErr: any) {
-        // Only rethrow specific errors from profile validation
-        if (profileErr instanceof Error && 
-            (profileErr.message.includes("Conta desativada") || 
-             profileErr.message.includes("Acesso negado"))) {
-          throw profileErr;
-        }
-        
-        // For other profile-related errors, log but still return auth data
-        console.warn('[auth] Profile validation warning:', profileErr);
-        return data;
-      }
+      return data; // retorno explícito e consistente
     } catch (error: any) {
-      console.error('[auth] Login process failed:', error);
+      console.error("[auth] Falha no login:", error);
       throw error;
     }
   };
@@ -187,6 +140,6 @@ export const useAuthOperations = ({
   return {
     login,
     logout,
-    register
+    register,
   };
 };
