@@ -31,6 +31,7 @@ export const useAuthOperations = ({
         address,
       } = data;
 
+      // 1. Cria o usuário
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
@@ -52,6 +53,10 @@ export const useAuthOperations = ({
       if (authError) throw authError;
       if (!authData.user?.id) throw new Error("Falha ao criar conta.");
 
+      // 2. Login imediato para garantir sessão
+      await supabase.auth.signInWithPassword({ email, password });
+
+      // 3. Cria o perfil
       const { error: profileError } = await supabase.from("profiles").insert([
         {
           id: authData.user.id,
@@ -74,7 +79,11 @@ export const useAuthOperations = ({
         },
       ]);
 
-      if (profileError) throw profileError;
+      if (profileError) {
+        console.error("🔴 Erro ao inserir perfil:", profileError);
+        throw profileError;
+      }
+
       return authData;
     } catch (error: any) {
       console.error("🔴 Erro no registro:", error);
@@ -105,7 +114,6 @@ export const useAuthOperations = ({
 
   const login = async (email: string, password: string, profileType: ProfileType) => {
     try {
-      console.log(`[auth] Login: ${email} | Tipo: ${profileType}`);
       const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
       if (error) throw new Error("Credenciais inválidas.");
@@ -130,7 +138,7 @@ export const useAuthOperations = ({
         throw new Error(`Acesso negado: esta conta não é do tipo ${profileType}.`);
       }
 
-      return data; // retorno explícito e consistente
+      return data;
     } catch (error: any) {
       console.error("[auth] Falha no login:", error);
       throw error;
