@@ -53,10 +53,12 @@ export const useAuthOperations = ({
       if (authError) throw authError;
       if (!authData.user?.id) throw new Error("Falha ao criar conta.");
 
-      // 2. Login imediato para garantir sessão
-      await supabase.auth.signInWithPassword({ email, password });
+      // 2. Faz login imediato para ativar a sessão
+      const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({ email, password });
+      if (loginError) throw loginError;
+      if (!loginData.user?.id) throw new Error("Não foi possível autenticar após cadastro.");
 
-      // 3. Cria o perfil
+      // 3. Cria o perfil na tabela, mas só se o usuário foi autenticado
       const { error: profileError } = await supabase.from("profiles").insert([
         {
           id: authData.user.id,
@@ -79,12 +81,10 @@ export const useAuthOperations = ({
         },
       ]);
 
-      if (profileError) {
-        console.error("🔴 Erro ao inserir perfil:", profileError);
-        throw profileError;
-      }
+      if (profileError) throw profileError;
 
-      return authData;
+      // Sucesso: retorna o usuário autenticado
+      return loginData;
     } catch (error: any) {
       console.error("🔴 Erro no registro:", error);
       throw error;
